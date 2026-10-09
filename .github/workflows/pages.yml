@@ -1,0 +1,51 @@
+name: Deploy Battle Ramps Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Rebuild the playable HTML
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cat bundle/part-*.b64 | tr -d '\n' | base64 --decode | gzip --decompress > _site/index.html
+          test -s _site/index.html
+          grep -q 'BATTLE RAMPS' _site/index.html
+          grep -q 'id="splashStart"' _site/index.html
+          echo "Built Battle Ramps ($(wc -c < _site/index.html) bytes)"
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
