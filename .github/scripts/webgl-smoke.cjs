@@ -46,7 +46,9 @@ const { chromium } = require('playwright');
     await page.waitForFunction(() => {
       const menu = document.querySelector('#menu');
       const message = document.querySelector('#topmsg')?.textContent || '';
-      return menu && getComputedStyle(menu).display === 'none' && message.includes('gestart');
+      const renderFailed = /3D-renderfout|3D starten mislukt|arena lijkt leeg|tekent geen volledig speelveld/i.test(message);
+      // A renderer error can replace the brief "gestart" message before this test observes it.
+      return (menu && getComputedStyle(menu).display === 'none') || renderFailed;
     }, null, { timeout: 5000 });
 
     await page.waitForTimeout(1500);
