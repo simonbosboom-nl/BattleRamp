@@ -436,11 +436,11 @@ function verifyWebGLFrame(){
   for(let k=0;k<3;k++){ranges[k][0]=Math.min(ranges[k][0],rgb[k]);ranges[k][1]=Math.max(ranges[k][1],rgb[k])}
  }
  const spread=Math.max(...ranges.map(r=>r[1]-r[0]));
- const clear=[51,110,158]; // matches gl.clearColor(.20,.43,.62,1)
+ const clear=[9,23,36]; // matches gl.clearColor(.035,.09,.14,1)
  const fieldPixels=samples.filter(rgb=>Math.hypot(rgb[0]-clear[0],rgb[1]-clear[1],rgb[2]-clear[2])>42).length;
  // Colour diversity alone can be fooled by a few stray pixels. Require scene coverage
  // through the lower viewport before we trust WebGL instead of switching to 2D.
- if(colors.size<5||spread<28||fieldPixels<5)throw new Error('WebGL tekent geen volledig speelveld; automatisch overschakelen naar de zichtbare 2D-arena');
+ if(colors.size<5||spread<28||fieldPixels<5)throw new Error('WebGL tekent geen volledig speelveld; de 3D-arena lijkt leeg.');
  rendererVerified=true;
 }
 function buildRamp(){
