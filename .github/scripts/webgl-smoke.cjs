@@ -43,13 +43,24 @@ const { chromium } = require('playwright');
 
     await page.click('.carPick[data-car="0"]');
     await page.click('#startBtn');
-    await page.waitForFunction(() => {
-      const menu = document.querySelector('#menu');
-      const message = document.querySelector('#topmsg')?.textContent || '';
-      const renderFailed = /3D-renderfout|3D starten mislukt|arena lijkt leeg|tekent geen volledig speelveld/i.test(message);
-      // A renderer error can replace the brief "gestart" message before this test observes it.
-      return (menu && getComputedStyle(menu).display === 'none') || renderFailed;
-    }, null, { timeout: 5000 });
+    try {
+      await page.waitForFunction(() => {
+        const menu = document.querySelector('#menu');
+        const message = document.querySelector('#topmsg')?.textContent || '';
+        const renderFailed = /3D-renderfout|3D starten mislukt|arena lijkt leeg|tekent geen volledig speelveld/i.test(message);
+        // A renderer error can replace the brief "gestart" message before this test observes it.
+        return (menu && getComputedStyle(menu).display === 'none') || renderFailed;
+      }, null, { timeout: 5000 });
+    } catch (error) {
+      const diagnostic = await page.evaluate(() => ({
+        menuDisplay: getComputedStyle(document.querySelector('#menu')).display,
+        startDisabled: document.querySelector('#startBtn')?.disabled,
+        selectedCar: document.querySelector('.carPick.selected')?.dataset.car || null,
+        startLabel: document.querySelector('#startBtn')?.textContent || '',
+        message: document.querySelector('#topmsg')?.textContent || ''
+      }));
+      throw new Error('Startknop test mislukt; status=' + JSON.stringify(diagnostic) + '; ' + error.message);
+    }
 
     await page.waitForTimeout(1500);
 
