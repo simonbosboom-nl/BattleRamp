@@ -8,7 +8,6 @@
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#06131f;color:#effaff;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 #app{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 10%,#1a465e,#06131f 72%)}
 #gl{position:absolute;inset:0;width:100%;height:100%;display:block;outline:none;z-index:0}
-#glFallback{position:absolute;inset:0;width:100%;height:100%;display:none;outline:none;z-index:1;pointer-events:none}
 header{position:absolute;left:0;right:0;top:0;z-index:4;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:14px 18px;background:linear-gradient(180deg,rgba(2,10,18,.82),rgba(2,10,18,.12),transparent);pointer-events:none}
 .brand{font-size:clamp(22px,3vw,38px);font-weight:1000;letter-spacing:-1.8px;line-height:.95;font-style:italic;text-shadow:0 3px 18px #0008}.brand span{color:var(--cyan)}.tag{font-size:10px;letter-spacing:3px;color:#b6d4e3;margin-top:7px;font-weight:800}.studio{font-size:9px;letter-spacing:2px;color:#49e5ff;margin-top:5px;font-weight:950;text-transform:uppercase;text-shadow:0 0 12px #27dfff35}.menuStudio{margin-top:9px;margin-bottom:2px}
 .hud{display:flex;gap:7px}.stat{min-width:70px;padding:9px 12px;border-radius:12px;border:1px solid #36748b;background:rgba(2,16,28,.76);box-shadow:0 8px 25px #0003;text-align:center}.stat label{display:block;font-size:9px;letter-spacing:1.6px;color:#aac6d4;font-weight:900}.stat strong{font-size:20px;line-height:1.25}.blue{color:var(--cyan)}.orange{color:var(--orange)}.boostbar{height:5px;width:100%;background:#203849;border-radius:8px;margin-top:4px;overflow:hidden}.boostbar i{display:block;width:100%;height:100%;background:var(--cyan);box-shadow:0 0 12px var(--cyan)}
@@ -550,8 +549,6 @@ function resize(){const dpr=Math.min(window.devicePixelRatio||1,1.5);const w=Mat
 try{
  canvas.style.display='block';
  canvas.style.visibility='visible';
- fallbackCanvas.style.display='none';
- fallbackCanvas.style.visibility='hidden';
  initGL();
  $('fallback').style.display='none';
  resize();
