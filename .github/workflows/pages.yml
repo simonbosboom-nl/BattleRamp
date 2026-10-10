@@ -28,9 +28,11 @@ jobs:
           set -euo pipefail
           mkdir -p _site/assets
           cp index.html _site/index.html
-          cat site-bundle/stadium-[0-1][0-9].b64 | tr -d '\n' | base64 --decode > _site/assets/battle-ramps-stadium.webp
+          base64 --decode < site-bundle/stadium-clean.b64 > _site/assets/battle-ramps-stadium.webp
           test -s _site/index.html
           test -s _site/assets/battle-ramps-stadium.webp
+          test "$(stat -c %s _site/assets/battle-ramps-stadium.webp)" -gt 6000
+          grep -q 'v=clean-20261010a' _site/index.html
           grep -q 'BATTLE RAMPS' _site/index.html
           grep -q 'id="splashStart"' _site/index.html
           grep -q 'Kies je auto' _site/index.html

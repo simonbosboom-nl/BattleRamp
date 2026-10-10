@@ -36,7 +36,7 @@ header{position:absolute;left:0;right:0;top:0;z-index:4;display:flex;justify-con
 @media(max-width:700px){header{padding:10px;align-items:flex-start}.brand{font-size:22px}.tag{font-size:8px;letter-spacing:1.6px}.stat{min-width:48px;padding:6px 7px}.stat label{font-size:7px;letter-spacing:.7px}.stat strong{font-size:16px}#topmsg{top:78px}#bottom{padding:12px;display:block}#instructions{max-width:100%;font-size:10px}#instructions .desktop{display:none}.actions{max-width:100%;justify-content:center;margin-top:7px}.actions button{padding:8px;font-size:11px}#touch{display:flex;bottom:128px}.carGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.carPick{min-height:70px}.menuCard{padding:18px}.subtitle{font-size:13px}}
 
 /* Cinematic Battle Ramps art-directed start screen */
-#cinematicSplash{position:absolute;inset:0;z-index:30;overflow:hidden;opacity:1;background:rgba(2,9,19,.24);background-image:linear-gradient(90deg,rgba(2,7,14,.30),rgba(2,7,14,.08) 55%,rgba(2,7,14,.26)),radial-gradient(ellipse at 50% 16%,rgba(23,81,126,.20),rgba(2,8,17,.44));background-size:cover;background-position:center center;transition:opacity .24s ease;}
+#cinematicSplash{position:absolute;inset:0;z-index:30;overflow:hidden;opacity:1;background:rgba(2,9,19,.24);background-image:linear-gradient(90deg,rgba(2,7,14,.12),rgba(2,7,14,.04) 55%,rgba(2,7,14,.18)),url("assets/battle-ramps-stadium.webp?v=clean-20261010a");background-size:cover;background-position:center center;transition:opacity .24s ease;}
 #cinematicSplash:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(2,8,16,.68),rgba(2,8,16,.05) 43%,rgba(2,8,16,.08));pointer-events:none}
 #splashLogo{position:absolute;z-index:4;left:3.3%;top:4.5%;width:min(37vw,560px);pointer-events:none;transform:skew(-7deg);filter:drop-shadow(0 7px 6px #000b)}
 #splashLogo span{display:block;font-family:Impact,Haettenschweiler,"Arial Black",system-ui,sans-serif;font-weight:1000;line-height:.79;text-transform:uppercase;letter-spacing:-.065em;-webkit-text-stroke:1px rgba(10,17,27,.7)}
@@ -597,7 +597,7 @@ try{initGL();const ro=new ResizeObserver(resize);ro.observe(canvas);resize();upd
    if(typeof window.__BRChooseCar==='function')window.__BRChooseCar(0);
   }
   if(splash){splash.classList.add('hidden');splash.style.display='none';splash.style.pointerEvents='none';splash.setAttribute('aria-hidden','true')}
-  if(menu){menu.style.display='flex';menu.classList.add('cinematic-setup');menu.style.zIndex='100';menu.setAttribute('aria-label','Auto- en teamkeuze')}
+  if(menu){menu.classList.remove('hidden');menu.classList.add('cinematic-setup');menu.style.setProperty('display','flex','important');menu.style.setProperty('z-index','1000','important');menu.style.visibility='visible';menu.style.opacity='1';menu.style.pointerEvents='auto';menu.setAttribute('aria-label','Auto- en teamkeuze')}
   const sub=el('setupDirections');
   if(sub)sub.textContent='Kies je auto, stel de teams in en druk daarna op START MET …';
  }
