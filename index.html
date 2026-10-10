@@ -40,19 +40,21 @@ header{position:absolute;left:0;right:0;top:0;z-index:4;display:flex;justify-con
 #cinematicSplash:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(2,8,16,.6),transparent 22%,transparent 72%,rgba(2,8,16,.07));pointer-events:none}
 #cinematicSplash.hidden{opacity:0;pointer-events:none}
 .splash-hotspot{position:absolute;z-index:2;border:1px solid transparent;border-radius:10px;background:rgba(0,0,0,0);padding:0;box-shadow:none;color:transparent;cursor:pointer;outline-offset:2px;}
-.splash-hotspot:hover,.splash-hotspot:focus-visible{border-color:#83f5ff;background:rgba(17,187,255,.13);box-shadow:0 0 24px #22dfff65,inset 0 0 18px #22dfff35;outline:1px solid #bafaff}
+.splash-hotspot:hover,.splash-hotspot:focus-visible{border-color:#ffd15b;background:rgba(255,191,51,.12);box-shadow:0 0 20px #ffb92855,inset 0 0 14px #ffdb6a24;outline:1px solid #ffe59a}
 .splash-hotspot:active{background:rgba(49,220,255,.22)}
-#splashStart{left:2.4%;top:43.2%;width:24.2%;height:8.8%}
-#splashGarage{left:2.4%;top:58.2%;width:24.0%;height:6.8%}
-#splashShop{left:2.4%;top:51.7%;width:24.0%;height:6.7%}
-#splashSettings{left:2.4%;top:63.5%;width:24.0%;height:7.2%}
-#splashExit{left:2.4%;top:69.8%;width:24.0%;height:7.1%}
+#splashStart{left:2.0%;top:49.0%;width:24.8%;height:7.2%}
+#splashGarage{left:2.0%;top:63.7%;width:24.8%;height:7.0%}
+#splashShop{left:2.0%;top:56.5%;width:24.8%;height:7.0%}
+#splashSettings{left:2.0%;top:70.9%;width:24.8%;height:7.0%}
+#splashExit{left:2.0%;top:78.1%;width:24.8%;height:7.2%}
+#splashStudio{position:absolute;z-index:2;left:4.2%;top:38.5%;max-width:31%;padding:7px 11px;border-left:3px solid #ffbd43;background:linear-gradient(90deg,rgba(3,12,24,.80),rgba(3,12,24,.22));color:#d9eaf4;font:800 clamp(9px,1vw,13px)/1.2 system-ui,sans-serif;letter-spacing:1.3px;text-shadow:0 2px 8px #000;pointer-events:none}
+#splashStudio strong{display:block;margin-top:3px;color:#fff;font-size:clamp(11px,1.45vw,18px);letter-spacing:1.8px}
 #splashFooter{position:absolute;z-index:2;left:2.5%;right:2.5%;bottom:1.4%;display:flex;justify-content:space-between;gap:12px;align-items:center;color:#d9f8ff;font:800 10px/1.2 system-ui,sans-serif;letter-spacing:1.2px;text-shadow:0 2px 8px #000;pointer-events:none}
 #splashFooter span:last-child{text-align:right;color:#b8d0df}
 #menu.cinematic-setup{z-index:21;background:rgba(0,7,15,.54);backdrop-filter:blur(7px)}
 #menu.cinematic-setup .menuCard{border-color:#73e9ff;background:linear-gradient(145deg,rgba(5,26,42,.95),rgba(3,10,20,.96));box-shadow:0 0 0 1px #47dfff26,0 30px 100px #000d}
 #menu.cinematic-setup .menuTitle{text-shadow:0 4px 18px #000}
-@media(max-width:700px){#cinematicSplash{background-position:34% top}#splashStart{left:2%;top:43.3%;width:37%;height:8.2%}#splashGarage{left:2%;top:58%;width:37%;height:6.8%}#splashShop{left:2%;top:51.8%;width:37%;height:6.8%}#splashSettings{left:2%;top:64%;width:37%;height:7%}#splashExit{left:2%;top:70%;width:37%;height:7%}#splashFooter{font-size:8px;letter-spacing:.4px;bottom:5px}}
+@media(max-width:700px){#cinematicSplash{background-position:34% top}#splashStart{left:2%;top:49%;width:39%;height:7.2%}#splashGarage{left:2%;top:63.7%;width:39%;height:7%}#splashShop{left:2%;top:56.5%;width:39%;height:7%}#splashSettings{left:2%;top:70.9%;width:39%;height:7%}#splashExit{left:2%;top:78.1%;width:39%;height:7.2%}#splashStudio{left:3%;top:38%;max-width:44%;padding:5px 7px;letter-spacing:.7px}#splashStudio strong{letter-spacing:.9px}#splashFooter{font-size:8px;letter-spacing:.4px;bottom:5px}}
 
 /* Battle Ramps setup clarity upgrade */
 .menuCard{width:min(1040px,96vw);max-height:92vh;padding:clamp(16px,2.3vw,28px)}
@@ -78,6 +80,7 @@ header{position:absolute;left:0;right:0;top:0;z-index:4;display:flex;justify-con
 <body><div id="app">
 <canvas id="gl" aria-label="Battle Ramps 3D arena"></canvas>
 <div id="cinematicSplash" role="navigation" aria-label="Battle Ramps hoofdmenu">
+<div id="splashStudio" aria-label="Geproduceerd door Homework Ninja Studios">PRODUCED BY<strong>HOMEWORK NINJA STUDIOS</strong></div>
 <button type="button" class="splash-hotspot" id="splashStart" aria-label="Start wedstrijd" title="Start wedstrijd">Start wedstrijd</button>
 <button type="button" class="splash-hotspot" id="splashGarage" aria-label="Garage en auto kiezen" title="Garage">Garage</button>
 <button type="button" class="splash-hotspot" id="splashShop" aria-label="Winkel openen" title="Winkel">Winkel</button>
