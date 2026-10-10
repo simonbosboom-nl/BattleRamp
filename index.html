@@ -96,10 +96,10 @@ kbd{background:#112d40;border:1px solid #456b7e;border-bottom-width:2px;border-r
 <canvas id="glFallback" aria-label="Battle Ramps arena in compatibility mode"></canvas>
 <div id="cinematicSplash" role="navigation" aria-label="Battle Ramps hoofdmenu">\n<div id="splashLogo" aria-hidden="true"><span class="splashWordBattle">BATTLE</span><span class="splashWordRamps">RAMPS</span></div>
 <div id="splashStudio" aria-label="Geproduceerd door Homework Ninja Studios">PRODUCED BY<strong>HOMEWORK NINJA STUDIOS</strong></div>
-<button type="button" class="splash-hotspot" id="splashStart" onclick="window.__BROpenSetup && window.__BROpenSetup(true)" aria-label="Speel: begin een wedstrijd" title="Begin een wedstrijd">▶ &nbsp; SPEEL</button>
-<button type="button" class="splash-hotspot" id="splashGarage" onclick="window.__BROpenSetup && window.__BROpenSetup(false)" aria-label="Garage en auto kiezen" title="Kies je auto">▣ &nbsp; GARAGE</button>
+<button type="button" class="splash-hotspot" id="splashStart" aria-label="Speel: begin een wedstrijd" title="Begin een wedstrijd">▶ &nbsp; SPEEL</button>
+<button type="button" class="splash-hotspot" id="splashGarage" aria-label="Garage en auto kiezen" title="Kies je auto">▣ &nbsp; GARAGE</button>
 <button type="button" class="splash-hotspot" id="splashShop" aria-label="Winkel openen" title="Open de winkel">🛒 &nbsp; WINKEL</button>
-<button type="button" class="splash-hotspot" id="splashSettings" onclick="window.__BROpenSetup && window.__BROpenSetup(false)" aria-label="Instellingen en teamgrootte" title="Instellingen">⚙ &nbsp; INSTELLINGEN</button>
+<button type="button" class="splash-hotspot" id="splashSettings" aria-label="Instellingen en teamgrootte" title="Instellingen">⚙ &nbsp; INSTELLINGEN</button>
 <button type="button" class="splash-hotspot" id="splashExit" aria-label="Spel afsluiten" title="Afsluiten">↪ &nbsp; AFSLUITEN</button>
 <div id="splashFooter"><span>RACE · JUMP · SHOOT · WIN</span><span>SPEELBARE PROTOTYPE · BATTLE RAMPS</span></div>
 </div>
@@ -205,12 +205,27 @@ $('carPrevBtn').addEventListener('click',()=>changeCar(selected-1));
 $('carNextBtn').addEventListener('click',()=>changeCar(selected+1));
 $('carGrid').innerHTML=TYPES.map((t,i)=>`<button type="button" class="carPick ${i===0?'selected':''}" data-car="${i}" aria-pressed="${i===0?'true':'false'}">${carSvg(t,'card'+i)}<span class="carLabel"><b>${t.name}</b><span class="carChosen">✓ GEKOZEN</span></span><small>${t.desc}<br>Topsnelheid ${t.max} · Turbo ${t.boost}</small></button>`).join('');document.querySelectorAll('.carPick').forEach(b=>b.addEventListener('click',()=>chooseCar(+b.dataset.car)));syncCarSelection();
 
-function leaveSplash(){const s=$('cinematicSplash');s.classList.add('hidden');setTimeout(()=>{if(s.classList.contains('hidden'))s.style.display='none'},260)}
-function showSetupFromSplash(){selectedCarConfirmed=false;leaveSplash();$('menu').style.display='flex';$('menu').classList.add('cinematic-setup');$('menu').querySelector('.subtitle').textContent='STAP 1 — VERPLICHT: klik op een auto om hem te kiezen. Stel daarna de teams in en druk op START.';syncCarSelection();updateHUD();setTimeout(()=>{$('carGrid').querySelector(`[data-car="${selected}"]`)?.focus({preventScroll:true})},280)}
-$('splashStart').addEventListener('click',()=>{$('blueCount').value='5';$('orangeCount').value='5';selected=0;boost=TYPES[selected].boost;showSetupFromSplash();say('Kies eerst je auto, controleer 5v5 en klik daarna op START MET …',4)});
-$('backSplashBtn').addEventListener('click',()=>{const menu=$('menu'),s=$('cinematicSplash');menu.style.display='none';menu.classList.remove('cinematic-setup');s.style.display='block';s.style.visibility='visible';s.style.opacity='1';s.style.pointerEvents='auto';s.removeAttribute('aria-hidden');s.classList.remove('hidden');});
-$('splashGarage').addEventListener('click',showSetupFromSplash);
-$('splashSettings').addEventListener('click',showSetupFromSplash);
+function leaveSplash(){
+ const splash=$('cinematicSplash');
+ splash.classList.add('hidden');
+ splash.style.pointerEvents='none';
+ splash.setAttribute('aria-hidden','true');
+ setTimeout(()=>{if(splash.classList.contains('hidden'))splash.style.display='none'},260);
+}
+function showSetupFromSplash(resetTeams=false){
+ selectedCarConfirmed=false;
+ if(resetTeams){$('blueCount').value='5';$('orangeCount').value='5';selected=0;boost=TYPES[0].boost}
+ leaveSplash();
+ const menu=$('menu');
+ menu.style.setProperty('display','flex','important');
+ menu.style.setProperty('z-index','1000','important');
+ menu.style.visibility='visible';menu.style.opacity='1';menu.style.pointerEvents='auto';
+ menu.classList.add('cinematic-setup');
+ menu.querySelector('.subtitle').textContent='STAP 1 — VERPLICHT: klik op een auto om hem te kiezen. Stel daarna beide teams in en druk op START.';
+ syncCarSelection();updateHUD();
+ setTimeout(()=>{$('carGrid').querySelector('[data-car="'+selected+'"]')?.focus({preventScroll:true})},280)
+}
+window.__BRShowSetupFromSplash=showSetupFromSplash;
 $('splashShop').addEventListener('click',()=>{returnToSplash=true;leaveSplash();openShop()});
 $('splashExit').addEventListener('click',()=>{say('Je kunt Battle Ramps sluiten door dit tabblad te sluiten.',4);$('splashExit').style.background='rgba(255,150,55,.12)';$('splashExit').style.borderColor='rgba(255,150,55,.7)'});
 $('startBtn').onclick=()=>window.__BRStartGame();$('blueCount').addEventListener('change',()=>{updateHUD();syncCarSelection()});$('orangeCount').addEventListener('change',()=>{updateHUD();syncCarSelection()});
@@ -605,7 +620,7 @@ function updateAI(car,team,cars,dt){
 function resetAfterGoal(team){if(team==='blue')blue++;else orange++;say(team==='blue'?'GOOOAL! Blauw scoort!':'Oranje scoort!',1.8);resetPositions();updateHUD()}
 function saveProgress(){try{localStorage.setItem('br_wins',String(wins));localStorage.setItem('br_cosmetics',JSON.stringify(ownedCosmetics));localStorage.setItem('br_equipped',equippedCosmetic)}catch(e){}}
 function openShop(){paused=playing?true:paused;const modal=$('shopModal');if(!modal)return;modal.style.setProperty('display','flex','important');modal.style.setProperty('z-index','2000','important');modal.style.visibility='visible';try{renderShop()}catch(e){console.error('Shop render error:',e);$('shopItems').textContent='De winkel kon niet volledig laden. Je kunt de winkel sluiten en opnieuw openen.'}}
-function closeShop(){$('shopModal').style.display='none';if(playing)paused=false;else if(returnToSplash){returnToSplash=false;$('menu').style.display='none';const s=$('cinematicSplash');s.style.display='block';requestAnimationFrame(()=>s.classList.remove('hidden'))}}
+function closeShop(){$('shopModal').style.display='none';if(playing)paused=false;else if(returnToSplash){returnToSplash=false;$('menu').style.display='none';const s=$('cinematicSplash');s.style.display='block';s.style.visibility='visible';s.style.opacity='1';s.style.pointerEvents='auto';s.removeAttribute('aria-hidden');requestAnimationFrame(()=>s.classList.remove('hidden'))}}
 function renderShop(){$('shopWins').textContent=wins;$('winsText').textContent=wins;$('menuWins').textContent='🏆 '+wins+' wins';$('shopItems').innerHTML=SHOP_ITEMS.map(it=>{const owned=ownedCosmetics.includes(it.id),active=equippedCosmetic===it.id;let label=active?'✓ UITGERUST':owned?'UITRUSTEN':`KOOP · ${it.price} WINS`;return `<div class="shopItem"><div class="shopSwatch" style="background:${it.swatch}"></div><h3>${it.name}</h3><p>${it.desc}</p><button data-shop="${it.id}" ${active?'disabled':''}>${label}</button></div>`}).join('')}
 function finishMatch(){clock=0;playing=false;gameOver=true;const outcome=blue>orange?'GEWONNEN! +1 WIN 🏆':blue<orange?'VERLOREN — volgende keer beter!':'GELIJKSPEL — geen win deze keer';if(blue>orange){wins++;saveProgress();} $('menu').style.display='flex';$('menu').classList.remove('cinematic-setup');$('startBtn').textContent='OPNIEUW SPELEN 🚀';const subtitle=$('menu').querySelector('.subtitle');subtitle.textContent=`${outcome} Eindstand: Blauw ${blue} — Oranje ${orange}. Wins zijn je winkelvaluta; koop er decoraties voor je auto mee.`;say(`WEDSTRIJD AFGELOPEN · ${outcome}`,99);updateHUD();renderShop()}
 function update(dt){if(!playing||paused)return;worldTime+=dt;clock-=dt;goalCooldown=Math.max(0,goalCooldown-dt);if(clock<=0){clock=0;finishMatch();return}if(!minuteWarning&&clock<=60){minuteWarning=true;showEvent('LAATSTE MINUUT!','Nog 60 seconden om te scoren!',4.5);say('LAATSTE MINUUT! Nog 60 seconden.',4.5)}updateDrops(dt)
@@ -690,8 +705,9 @@ try{initGL();const ro=new ResizeObserver(resize);ro.observe(canvas);resize();upd
  document.addEventListener('click',event=>{
   const target=event.target instanceof Element?event.target.closest('#splashStart,#splashGarage,#splashSettings'):null;
   if(!target)return;
-  event.preventDefault();
-  openSetup(target.id==='splashStart');
+  event.preventDefault();event.stopImmediatePropagation();
+  if(typeof window.__BRShowSetupFromSplash==='function')window.__BRShowSetupFromSplash(target.id==='splashStart');
+  else openSetup(target.id==='splashStart');
  },true);
  // Explicit fallbacks for the two buttons most important to playing the game.
  const start=el('startBtn');
