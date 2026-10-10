@@ -138,7 +138,7 @@ const keys=Object.create(null),ramps=[],shots=[],particles=[],blueMates=[],orang
 const player={x:-42,z:0,y:0,vy:0,yaw:Math.PI/2,speed:0,ground:true,cool:0,jumpCool:0,team:'blue',index:0,weaponCooldown:0,hp:110,maxHp:110,ammo:12,rampStock:2,respawnTimer:0};
 const bot={x:42,z:0,y:0,vy:0,yaw:-Math.PI/2,speed:0,cool:0,team:'orange',index:0,count:3,style:2,weaponCooldown:1.4,hp:220,maxHp:220,ammo:8,rampStock:1,respawnTimer:0};
 const ball={x:0,z:0,y:1.15,vx:0,vz:0,vy:0,spin:0};
-let gl,prog,loc={},meshes={},staticMesh=null,worldTime=0,fallbackCtx=null,turfTile=null,turfPattern=null,returnToSplash=false,selectedCarConfirmed=false;
+let gl,prog,loc={},meshes={},staticMesh=null,worldTime=0,fallbackCtx=null,turfTile=null,turfPattern=null,returnToSplash=false,selectedCarConfirmed=false,rendererVerified=false,rendererFallbackActive=false;
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const V=(x=0,y=0,z=0)=>({x,y,z});
 // Expose core actions for the independent startup/input guard below.
@@ -146,6 +146,9 @@ window.__BRStartGame=()=>startGame();
 window.__BRChooseCar=(i)=>chooseCar(i);
 window.__BRChangeCar=(i)=>changeCar(i);
 window.__BRBuildRamp=()=>buildRamp();
+window.__BROpenShop=()=>openShop();
+window.__BRCloseShop=()=>closeShop();
+window.__BRSetReturnToSplash=(v)=>{returnToSplash=!!v};
 function say(s,hold=2.5){toast=s;msgHold=hold;$('topmsg').textContent=s}
 function updateHUD(){
 $('blueScore').textContent=blue;$('orangeScore').textContent=orange;$('time').textContent=Math.ceil(clock);$('rlBlueScore').textContent=blue;$('rlOrangeScore').textContent=orange;const secs=Math.max(0,Math.ceil(clock));$('rlTimer').textContent=Math.floor(secs/60)+':'+String(secs%60).padStart(2,'0');
@@ -387,14 +390,27 @@ function render(){if(!gl){renderFallback2D();return}const dpr=Math.min(window.de
 for(const side of [-1,1]){for(const z of [-8.3,8.3])drawMesh(meshes.sphere,model(side*67,5.4,z,0,.24,.24,.24),side<0?'#4cecff':'#ff9b46',1.6,view,proj,eye)}
 for(const car of [player,...blueMates,...orangeBots])if(!car.respawnTimer)drawMesh(meshes.shadow,model(car.x,.060,car.z,0,1.55,1,2.25),'#ffffff',0,view,proj,eye,1);drawMesh(meshes.shadow,model(ball.x,.058,ball.z,0,1.55,1,1.0),'#ffffff',0,view,proj,eye,1);
 if(!player.respawnTimer){if(followCam)drawCar(player,TYPES[selected],view,proj,eye,false);else{drawLocal(player,0,.43,1.05,1.78,.16,1.75,TYPES[selected].color,.08,view,proj,eye);drawLocal(player,0,.51,1.92,1.9,.2,.22,'#172a35',0,view,proj,eye)}}
-for(const mate of blueMates)if(!mate.respawnTimer)drawCar(mate,teamType(mate,'blue'),view,proj,eye,false);for(const rival of orangeBots)if(!rival.respawnTimer)drawCar(rival,teamType(rival,'orange'),view,proj,eye,true);drawBall(view,proj,eye);for(const r of ramps)drawRamp(r,view,proj,eye);for(const d of drops)drawDrop(d,view,proj,eye);drawEffects(view,proj,eye)}
+for(const mate of blueMates)if(!mate.respawnTimer)drawCar(mate,teamType(mate,'blue'),view,proj,eye,false);for(const rival of orangeBots)if(!rival.respawnTimer)drawCar(rival,teamType(rival,'orange'),view,proj,eye,true);drawBall(view,proj,eye);for(const r of ramps)drawRamp(r,view,proj,eye);for(const d of drops)drawDrop(d,view,proj,eye);drawEffects(view,proj,eye);verifyWebGLFrame()}
+function verifyWebGLFrame(){
+ if(rendererVerified||!gl)return;
+ if(gl.isContextLost&&gl.isContextLost())throw new Error('WebGL-context verloren');
+ const w=canvas.width,h=canvas.height;
+ if(w<8||h<8)throw new Error('WebGL-canvas heeft geen bruikbare afmetingen');
+ const probes=[[.5,.58],[.32,.58],[.68,.58],[.5,.78],[.2,.44],[.8,.44],[.5,.34],[.35,.8],[.65,.8],[.12,.68],[.88,.68]];
+ const colors=new Set(),px=new Uint8Array(4);
+ for(const [x,y] of probes){gl.readPixels(Math.min(w-1,Math.floor(w*x)),Math.min(h-1,Math.floor(h*(1-y))),1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);colors.add(px[0]+','+px[1]+','+px[2])}
+ if(colors.size<3)throw new Error('WebGL tekent alleen een lege achtergrond; automatisch overschakelen');
+ rendererVerified=true;
+}
 function makeTurfTile(){const cv=document.createElement('canvas');cv.width=cv.height=512;const t=cv.getContext('2d');t.fillStyle='#236b35';t.fillRect(0,0,512,512);let seed=918273;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};const grd=t.createLinearGradient(0,0,512,512);grd.addColorStop(0,'#31884a');grd.addColorStop(.5,'#1e7138');grd.addColorStop(1,'#15582e');t.globalAlpha=.48;t.fillStyle=grd;t.fillRect(0,0,512,512);t.globalAlpha=1;for(let i=0;i<9500;i++){const x=rnd()*512,y=rnd()*512,len=2+rnd()*12,light=rnd();t.strokeStyle=light>.6?'rgba(123,190,93,0.23)':light>.3?'rgba(4,35,18,0.22)':'rgba(187,218,137,0.10)';t.lineWidth=.4+rnd()*.9;t.beginPath();t.moveTo(x,y);t.lineTo(x+(rnd()-.5)*2,y-len);t.stroke()}for(let i=0;i<1400;i++){t.fillStyle=rnd()>.5?'rgba(195,222,150,.12)':'rgba(4,28,15,.12)';t.fillRect(rnd()*512,rnd()*512,1+rnd()*2,1+rnd()*2)}t.globalAlpha=1;return cv;}
 function renderFallback2D(){
  if(!fallbackCtx)return;
  if(!turfTile)turfTile=makeTurfTile();if(!turfPattern)turfPattern=fallbackCtx.createPattern(turfTile,'repeat');
  const c=fallbackCtx,dpr=Math.min(window.devicePixelRatio||1,1.5),w=Math.max(1,Math.floor(fallbackCanvas.clientWidth*dpr)),h=Math.max(1,Math.floor(fallbackCanvas.clientHeight*dpr));
  if(fallbackCanvas.width!==w||fallbackCanvas.height!==h){fallbackCanvas.width=w;fallbackCanvas.height=h}
- c.setTransform(dpr,0,0,dpr,0,0);const W=fallbackCanvas.clientWidth||1000,H=fallbackCanvas.clientHeight||600;
+ c.setTransform(dpr,0,0,dpr,0,0);
+ if(typeof c.roundRect!=='function')c.roundRect=function(x,y,w0,h0,r=4){const rr=Math.max(0,Math.min(r,w0/2,h0/2));this.moveTo(x+rr,y);this.arcTo(x+w0,y,x+w0,y+h0,rr);this.arcTo(x+w0,y+h0,x,y+h0,rr);this.arcTo(x,y+h0,x,y,rr);this.arcTo(x,y,x+w0,y,rr)};
+ const W=fallbackCanvas.clientWidth||1000,H=fallbackCanvas.clientHeight||600;
  c.clearRect(0,0,W,H);
  const sky=c.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#07111e');sky.addColorStop(.43,'#17394d');sky.addColorStop(1,'#06131d');c.fillStyle=sky;c.fillRect(0,0,W,H);
  // Stadium bowl, spectator tiers and lights.
@@ -438,7 +454,7 @@ function renderFallback2D(){
  const dot=(x,z,y=0)=>P(clamp(x,-77,77),clamp(z,-47,47),y);
  // Draw only the ramps the player has placed; none are pre-installed.
  for(const r of ramps){
-  const q=P(r.x,r.z),rw=Math.max(18,5.0*sx),rl=Math.max(22,6.5*sz),trim=r.color||'#42ddff';
+  const q=P(r.x,r.z),rd=depthOf(r.x,r.z),rw=clamp(W*.035*rd,18,56),rl=clamp(H*.065*rd,22,54),trim=r.color||'#42ddff';
   c.save();c.translate(q.x,q.y);c.rotate(Math.PI/2-r.yaw);
   c.fillStyle='#0009';c.beginPath();c.ellipse(0,4,Math.max(8,rw*.72),Math.max(5,rl*.58),0,0,Math.PI*2);c.fill();
   const rampGrad=c.createLinearGradient(0,-rl*.52,0,rl*.52);rampGrad.addColorStop(0,'#52616c');rampGrad.addColorStop(.38,'#293b49');rampGrad.addColorStop(1,'#111e2a');
@@ -567,7 +583,7 @@ function updateAI(car,team,cars,dt){
 }
 function resetAfterGoal(team){if(team==='blue')blue++;else orange++;say(team==='blue'?'GOOOAL! Blauw scoort!':'Oranje scoort!',1.8);resetPositions();updateHUD()}
 function saveProgress(){try{localStorage.setItem('br_wins',String(wins));localStorage.setItem('br_cosmetics',JSON.stringify(ownedCosmetics));localStorage.setItem('br_equipped',equippedCosmetic)}catch(e){}}
-function openShop(){paused=playing?true:paused;$('shopModal').style.display='flex';renderShop()}
+function openShop(){paused=playing?true:paused;const modal=$('shopModal');if(!modal)return;modal.style.setProperty('display','flex','important');modal.style.setProperty('z-index','2000','important');modal.style.visibility='visible';try{renderShop()}catch(e){console.error('Shop render error:',e);$('shopItems').textContent='De winkel kon niet volledig laden. Je kunt de winkel sluiten en opnieuw openen.'}}
 function closeShop(){$('shopModal').style.display='none';if(playing)paused=false;else if(returnToSplash){returnToSplash=false;$('menu').style.display='none';const s=$('cinematicSplash');s.style.display='block';requestAnimationFrame(()=>s.classList.remove('hidden'))}}
 function renderShop(){$('shopWins').textContent=wins;$('winsText').textContent=wins;$('menuWins').textContent='🏆 '+wins+' wins';$('shopItems').innerHTML=SHOP_ITEMS.map(it=>{const owned=ownedCosmetics.includes(it.id),active=equippedCosmetic===it.id;let label=active?'✓ UITGERUST':owned?'UITRUSTEN':`KOOP · ${it.price} WINS`;return `<div class="shopItem"><div class="shopSwatch" style="background:${it.swatch}"></div><h3>${it.name}</h3><p>${it.desc}</p><button data-shop="${it.id}" ${active?'disabled':''}>${label}</button></div>`}).join('')}
 function finishMatch(){clock=0;playing=false;gameOver=true;const outcome=blue>orange?'GEWONNEN! +1 WIN 🏆':blue<orange?'VERLOREN — volgende keer beter!':'GELIJKSPEL — geen win deze keer';if(blue>orange){wins++;saveProgress();} $('menu').style.display='flex';$('menu').classList.remove('cinematic-setup');$('startBtn').textContent='OPNIEUW SPELEN 🚀';const subtitle=$('menu').querySelector('.subtitle');subtitle.textContent=`${outcome} Eindstand: Blauw ${blue} — Oranje ${orange}. Wins zijn je winkelvaluta; koop er decoraties voor je auto mee.`;say(`WEDSTRIJD AFGELOPEN · ${outcome}`,99);updateHUD();renderShop()}
@@ -605,7 +621,28 @@ ball.x+=ball.vx*dt;ball.z+=ball.vz*dt;ball.y+=ball.vy*dt;ball.vy-=12*dt;if(ball.
 if(Math.abs(ball.z)>41.1){ball.z=clamp(ball.z,-41.1,41.1);ball.vz*=-.75}
 if(goalCooldown<=0&&Math.abs(ball.z)<8.25&&ball.x>69){resetAfterGoal('blue');return}if(goalCooldown<=0&&Math.abs(ball.z)<8.25&&ball.x< -69){resetAfterGoal('orange');return}if(Math.abs(ball.x)>67.1){ball.x=clamp(ball.x,-67.1,67.1);ball.vx*=-.72}
 for(const a of particles){a.x+=a.vx*dt;a.y+=a.vy*dt;a.z+=a.vz*dt;a.vy-=7*dt;a.life-=dt}for(let i=particles.length-1;i>=0;i--)if(particles[i].life<=0)particles.splice(i,1);if(msgHold>0)msgHold-=dt;else if(!paused)$('topmsg').textContent=followCam?'CHASE CAMERA · V = COCKPIT VIEW':'COCKPIT VIEW · V = CHASE CAMERA';updateHUD()}
-function loop(now){const dt=Math.min(.033,Math.max(.001,(now-last)/1000||.016));last=now;try{update(dt);render()}catch(e){console.error(e);say('Er ging iets mis in de 3D-renderer. Probeer opnieuw te starten.',99)}requestAnimationFrame(loop)}
+function activate2DFallback(reason){
+ if(rendererFallbackActive)return;
+ rendererFallbackActive=true;console.warn('Battle Ramps schakelt over naar 2D:',reason);
+ gl=null;canvas.style.display='none';fallbackCanvas.style.display='block';
+ try{fallbackCtx=fallbackCanvas.getContext('2d')}catch(e){fallbackCtx=null}
+ if(fallbackCtx){resize();updateCameraButton();say('3D-weergave werkte niet; de speelbare 2D-arena is gestart.',5)}
+ else{$('fallback').style.display='block';$('fallback').querySelector('p').textContent='De arena kan niet worden getekend. Probeer Safari of Chrome opnieuw te laden.'}
+}
+function loop(now){
+ const dt=Math.min(.033,Math.max(.001,(now-last)/1000||.016));last=now;
+ try{
+  update(dt);
+  if(gl&&gl.isContextLost&&gl.isContextLost())throw new Error('WebGL-context verloren');
+  render();
+  if(gl){const err=gl.getError();if(err!==gl.NO_ERROR)throw new Error('WebGL-tekenfout '+err)}
+ }catch(e){
+  console.error('Arena-renderer:',e);
+  if(gl||!rendererFallbackActive)activate2DFallback(e.message||e);
+  if(fallbackCtx){try{renderFallback2D()}catch(fe){console.error('2D-arena renderfout:',fe);const m=$('topmsg');if(m){m.textContent='Arena-tekenfout: '+(fe.message||fe);m.style.whiteSpace='normal';m.style.maxWidth='80vw';m.style.background='#541d27';m.style.color='#fff'}}}
+ }
+ requestAnimationFrame(loop)
+}
 function resize(){const dpr=Math.min(window.devicePixelRatio||1,1.5);const w=Math.max(1,Math.floor(canvas.clientWidth*dpr)),h=Math.max(1,Math.floor(canvas.clientHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;if(gl)gl.viewport(0,0,w,h)}if(fallbackCanvas.style.display!=='none'){const fw=Math.max(1,Math.floor(fallbackCanvas.clientWidth*dpr)),fh=Math.max(1,Math.floor(fallbackCanvas.clientHeight*dpr));if(fallbackCanvas.width!==fw||fallbackCanvas.height!==fh){fallbackCanvas.width=fw;fallbackCanvas.height=fh}}}
 try{initGL();const ro=new ResizeObserver(resize);ro.observe(canvas);resize();updateCameraButton();updateHUD();last=performance.now();requestAnimationFrame(loop)}catch(e){console.warn('3D-renderer niet beschikbaar; 2D-fallback wordt gestart:',e.message);gl=null;fallbackCtx=fallbackCanvas.getContext('2d');if(fallbackCtx){$('fallback').style.display='none';fallbackCanvas.style.display='block';resize();updateCameraButton();updateHUD();say('Compatibiliteitsmodus actief: speelveld in 2D-perspectief.',6);last=performance.now();requestAnimationFrame(loop)}else{$('fallback').style.display='block';$('fallback').querySelector('p').textContent='De arena kon niet worden weergegeven. Probeer een browser met canvas-ondersteuning.'}}
 })();
@@ -640,6 +677,18 @@ try{initGL();const ro=new ResizeObserver(resize);ro.observe(canvas);resize();upd
  if(start&&typeof window.__BRStartGame==='function')start.onclick=()=>window.__BRStartGame();
  const build=el('buildBtn');
  if(build&&typeof window.__BRBuildRamp==='function')build.onclick=()=>window.__BRBuildRamp();
+ // Capture-phase shop routes remain usable even if a normal button listener failed.
+ document.addEventListener('click',event=>{
+  const node=event.target instanceof Element?event.target.closest('#shopBtn,#menuShopBtn,#splashShop,#closeShop,#backToGame'):null;
+  if(!node)return;
+  event.preventDefault();event.stopImmediatePropagation();
+  try{
+   if(node.id==='splashShop'&&typeof window.__BRSetReturnToSplash==='function')window.__BRSetReturnToSplash(true);
+   if(node.id==='closeShop'||node.id==='backToGame'){if(typeof window.__BRCloseShop==='function')window.__BRCloseShop();else{const modal=el('shopModal');if(modal)modal.style.display='none'}}
+   else if(typeof window.__BROpenShop==='function')window.__BROpenShop();
+   else{const modal=el('shopModal');if(modal){modal.style.display='flex';modal.style.zIndex='2000';const items=el('shopItems');if(items)items.textContent='Winkel geopend; herlaad de game als de producten ontbreken.'}}
+  }catch(error){console.error('Shop click error:',error);const modal=el('shopModal');if(modal){modal.style.display='flex';modal.style.zIndex='2000'}const items=el('shopItems');if(items)items.textContent='Winkel is geopend, maar de inhoud kon niet worden geladen.'}
+ },true);
  // Recreate the car choices if the main script stopped before it populated the grid.
  const grid=el('carGrid');
  if(grid&&!grid.querySelector('.carPick')){
