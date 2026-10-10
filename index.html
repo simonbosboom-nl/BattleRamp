@@ -688,7 +688,31 @@ function loop(now){
  requestAnimationFrame(loop)
 }
 function resize(){const dpr=Math.min(window.devicePixelRatio||1,1.5);const w=Math.max(1,Math.floor(canvas.clientWidth*dpr)),h=Math.max(1,Math.floor(canvas.clientHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;if(gl)gl.viewport(0,0,w,h)}if(fallbackCanvas.style.display!=='none'){const fw=Math.max(1,Math.floor(fallbackCanvas.clientWidth*dpr)),fh=Math.max(1,Math.floor(fallbackCanvas.clientHeight*dpr));if(fallbackCanvas.width!==fw||fallbackCanvas.height!==fh){fallbackCanvas.width=fw;fallbackCanvas.height=fh}}}
-try{initGL();const ro=new ResizeObserver(resize);ro.observe(canvas);resize();updateCameraButton();updateHUD();last=performance.now();requestAnimationFrame(loop)}catch(e){console.warn('3D-renderer niet beschikbaar; 2D-fallback wordt gestart:',e.message);gl=null;fallbackCtx=fallbackCanvas.getContext('2d');if(fallbackCtx){$('fallback').style.display='none';fallbackCanvas.style.display='block';resize();updateCameraButton();updateHUD();say('Compatibiliteitsmodus actief: speelveld in 2D-perspectief.',6);last=performance.now();requestAnimationFrame(loop)}else{$('fallback').style.display='block';$('fallback').querySelector('p').textContent='De arena kon niet worden weergegeven. Probeer een browser met canvas-ondersteuning.'}}
+// Reliability fix: use the 2D canvas renderer as the default. The WebGL path
+// has been leaving a blank arena on some browsers even while the HUD keeps updating.
+// Keep the 3D code available for future testing, but don't let it produce a blank match.
+try{
+ gl=null;
+ canvas.style.display='none';
+ canvas.style.visibility='hidden';
+ fallbackCanvas.style.display='block';
+ fallbackCanvas.style.visibility='visible';
+ fallbackCanvas.style.opacity='1';
+ fallbackCanvas.style.zIndex='2';
+ fallbackCtx=fallbackCanvas.getContext('2d');
+ if(!fallbackCtx) throw new Error('2D canvas niet beschikbaar');
+ $('fallback').style.display='none';
+ resize();
+ updateCameraButton();
+ updateHUD();
+ say('Arena geladen · 2D-compatibiliteitsmodus.',6);
+ last=performance.now();
+ requestAnimationFrame(loop);
+}catch(e){
+ console.error('Arena kon niet starten:',e);
+ $('fallback').style.display='block';
+ $('fallback').querySelector('p').textContent='De arena kon niet worden weergegeven. Probeer Safari of Chrome opnieuw te laden.';
+}}
 })();
 </script>
 <script id="battleRampsInputGuard">
