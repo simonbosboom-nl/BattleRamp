@@ -257,7 +257,7 @@ function cylinderMesh(seg=16){const p=[],n=[];for(let i=0;i<seg;i++){const a=i/s
 function wedgeMesh(){const faces=[[[ -1,0,-1],[-1,0,1],[1,0,1],[1,0,-1]], [[-1,0,-1],[-1,1.65,1],[-1,0,1]], [[1,0,1],[1,1.65,1],[1,0,-1]], [[-1,0,1],[1,0,1],[1,1.65,1],[-1,1.65,1]], [[-1,0,-1],[-1,1.65,1],[1,1.65,1],[1,0,-1]]];const p=[],n=[];for(let f of faces){let tris=f.length===3?[0,1,2]:[0,1,2,0,2,3];let normal=[0,1,0];if(f.length>=3){let a=f[0],b=f[1],c=f[2],u=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],v=[c[0]-a[0],c[1]-a[1],c[2]-a[2]];normal=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];let l=Math.hypot(...normal)||1;normal=normal.map(q=>q/l)}for(let i of tris){p.push(...f[i]);n.push(...normal)}}return {p,n}}
 function shadowDiscMesh(){const p=[],n=[],c=[],segs=48,rings=12;const shade=[ [8,16,12],[14,35,20],[20,60,30],[33,103,48] ];function cc(r){const f=r*(shade.length-1),i=Math.min(shade.length-2,Math.floor(f)),t=f-i;return shade[i].map((v,k)=>((v+(shade[i+1][k]-v)*t)/255));}function vert(x,z,r){p.push(x,0,z);n.push(0,1,0);c.push(...cc(r));}for(let j=0;j<rings;j++){const r0=j/rings,r1=(j+1)/rings;for(let i=0;i<segs;i++){const a=i/segs*Math.PI*2,b=(i+1)/segs*Math.PI*2;const A=[Math.cos(a)*r0,Math.sin(a)*r0],B=[Math.cos(b)*r0,Math.sin(b)*r0],C=[Math.cos(b)*r1,Math.sin(b)*r1],D=[Math.cos(a)*r1,Math.sin(a)*r1];for(const q of [A,C,B,A,D,C])vert(q[0],q[1],q===A||q===B? r0:r1)}}return {p,n,c}}
 function color3(hex){const n=parseInt(hex.slice(1),16);return [(n>>16&255)/255,(n>>8&255)/255,(n&255)/255]}
-function initGL(){gl=canvas.getContext('webgl',{antialias:true,alpha:false,powerPreference:'high-performance'})||canvas.getContext('experimental-webgl');if(!gl)throw new Error('WebGL unavailable');prog=makeProgram();loc={model:gl.getUniformLocation(prog,'uModel'),view:gl.getUniformLocation(prog,'uView'),projection:gl.getUniformLocation(prog,'uProjection'),normal:gl.getUniformLocation(prog,'uNormal'),tint:gl.getUniformLocation(prog,'uTint'),eye:gl.getUniformLocation(prog,'uEye'),emissive:gl.getUniformLocation(prog,'uEmissive'),surface:gl.getUniformLocation(prog,'uSurface')};for(const [name,g] of Object.entries({cube:cubeMesh(),sphere:sphereMesh(30,20),wheel:cylinderMesh(32),ramp:wedgeMesh(),body:carBodyMesh(),shadow:shadowDiscMesh()}))meshes[name]=makeMesh(g.p,g.n,g.c);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);buildStaticScene()}
+function initGL(){gl=canvas.getContext('webgl',{antialias:true,alpha:false,powerPreference:'high-performance'})||canvas.getContext('experimental-webgl');if(!gl)throw new Error('WebGL unavailable');prog=makeProgram();loc={model:gl.getUniformLocation(prog,'uModel'),view:gl.getUniformLocation(prog,'uView'),projection:gl.getUniformLocation(prog,'uProjection'),normal:gl.getUniformLocation(prog,'uNormal'),tint:gl.getUniformLocation(prog,'uTint'),eye:gl.getUniformLocation(prog,'uEye'),emissive:gl.getUniformLocation(prog,'uEmissive'),surface:gl.getUniformLocation(prog,'uSurface')};for(const [name,g] of Object.entries({cube:cubeMesh(),sphere:sphereMesh(30,20),wheel:cylinderMesh(32),ramp:wedgeMesh(),body:carBodyMesh(),shadow:shadowDiscMesh()}))meshes[name]=makeMesh(g.p,g.n,g.c);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.disable(gl.DITHER);buildStaticScene()}
 function point(m,v){const x=v[0],y=v[1],z=v[2];return [m[0]*x+m[4]*y+m[8]*z+m[12],m[1]*x+m[5]*y+m[9]*z+m[13],m[2]*x+m[6]*y+m[10]*z+m[14]]}
 function npoint(m,v){let x=v[0],y=v[1],z=v[2],a=Math.hypot(m[0],m[2])||1,b=Math.hypot(m[8],m[10])||1;return [(m[0]*x+m[8]*z)/a,y, (m[2]*x+m[10]*z)/b]}
 function buildStaticScene(){
@@ -397,9 +397,18 @@ function verifyWebGLFrame(){
  const w=canvas.width,h=canvas.height;
  if(w<8||h<8)throw new Error('WebGL-canvas heeft geen bruikbare afmetingen');
  const probes=[[.5,.58],[.32,.58],[.68,.58],[.5,.78],[.2,.44],[.8,.44],[.5,.34],[.35,.8],[.65,.8],[.12,.68],[.88,.68]];
- const colors=new Set(),px=new Uint8Array(4);
- for(const [x,y] of probes){gl.readPixels(Math.min(w-1,Math.floor(w*x)),Math.min(h-1,Math.floor(h*(1-y))),1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);colors.add(px[0]+','+px[1]+','+px[2])}
- if(colors.size<3)throw new Error('WebGL tekent alleen een lege achtergrond; automatisch overschakelen');
+ const colors=new Set(),px=new Uint8Array(4),ranges=[[255,0],[255,0],[255,0]],samples=[];
+ for(const [x,y] of probes){
+  gl.readPixels(Math.min(w-1,Math.floor(w*x)),Math.min(h-1,Math.floor(h*(1-y))),1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);
+  const rgb=[px[0],px[1],px[2]];
+  colors.add(rgb.join(','));
+  samples.push(rgb);
+  for(let k=0;k<3;k++){ranges[k][0]=Math.min(ranges[k][0],rgb[k]);ranges[k][1]=Math.max(ranges[k][1],rgb[k])}
+ }
+ const spread=Math.max(...ranges.map(r=>r[1]-r[0]));
+ // Tiny per-pixel variation is not proof of a scene: an empty framebuffer or solid clear
+ // can vary slightly from dithering/precision. A real arena spans grass, lines and objects.
+ if(colors.size<4||spread<24)throw new Error('WebGL beeld is leeg of vrijwel egaal; automatisch overschakelen naar de speelbare 2D-arena');
  rendererVerified=true;
 }
 function makeTurfTile(){const cv=document.createElement('canvas');cv.width=cv.height=512;const t=cv.getContext('2d');t.fillStyle='#236b35';t.fillRect(0,0,512,512);let seed=918273;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};const grd=t.createLinearGradient(0,0,512,512);grd.addColorStop(0,'#31884a');grd.addColorStop(.5,'#1e7138');grd.addColorStop(1,'#15582e');t.globalAlpha=.48;t.fillStyle=grd;t.fillRect(0,0,512,512);t.globalAlpha=1;for(let i=0;i<9500;i++){const x=rnd()*512,y=rnd()*512,len=2+rnd()*12,light=rnd();t.strokeStyle=light>.6?'rgba(123,190,93,0.23)':light>.3?'rgba(4,35,18,0.22)':'rgba(187,218,137,0.10)';t.lineWidth=.4+rnd()*.9;t.beginPath();t.moveTo(x,y);t.lineTo(x+(rnd()-.5)*2,y-len);t.stroke()}for(let i=0;i<1400;i++){t.fillStyle=rnd()>.5?'rgba(195,222,150,.12)':'rgba(4,28,15,.12)';t.fillRect(rnd()*512,rnd()*512,1+rnd()*2,1+rnd()*2)}t.globalAlpha=1;return cv;}
@@ -624,7 +633,7 @@ for(const a of particles){a.x+=a.vx*dt;a.y+=a.vy*dt;a.z+=a.vz*dt;a.vy-=7*dt;a.li
 function activate2DFallback(reason){
  if(rendererFallbackActive)return;
  rendererFallbackActive=true;console.warn('Battle Ramps schakelt over naar 2D:',reason);
- gl=null;canvas.style.display='none';fallbackCanvas.style.display='block';
+ gl=null;canvas.style.display='none';canvas.style.visibility='hidden';fallbackCanvas.style.display='block';fallbackCanvas.style.visibility='visible';fallbackCanvas.style.opacity='1';fallbackCanvas.style.zIndex='2';
  try{fallbackCtx=fallbackCanvas.getContext('2d')}catch(e){fallbackCtx=null}
  if(fallbackCtx){resize();updateCameraButton();say('3D-weergave werkte niet; de speelbare 2D-arena is gestart.',5)}
  else{$('fallback').style.display='block';$('fallback').querySelector('p').textContent='De arena kan niet worden getekend. Probeer Safari of Chrome opnieuw te laden.'}
@@ -683,7 +692,11 @@ try{initGL();const ro=new ResizeObserver(resize);ro.observe(canvas);resize();upd
   if(!node)return;
   event.preventDefault();event.stopImmediatePropagation();
   try{
-   if(node.id==='splashShop'&&typeof window.__BRSetReturnToSplash==='function')window.__BRSetReturnToSplash(true);
+   if(node.id==='splashShop'){
+    if(typeof window.__BRSetReturnToSplash==='function')window.__BRSetReturnToSplash(true);
+    const splash=el('cinematicSplash');
+    if(splash){splash.classList.add('hidden');splash.style.pointerEvents='none';splash.style.display='none'}
+   }
    if(node.id==='closeShop'||node.id==='backToGame'){if(typeof window.__BRCloseShop==='function')window.__BRCloseShop();else{const modal=el('shopModal');if(modal)modal.style.display='none'}}
    else if(typeof window.__BROpenShop==='function')window.__BROpenShop();
    else{const modal=el('shopModal');if(modal){modal.style.display='flex';modal.style.zIndex='2000';const items=el('shopItems');if(items)items.textContent='Winkel geopend; herlaad de game als de producten ontbreken.'}}
