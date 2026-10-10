@@ -590,16 +590,17 @@ try{initGL();const ro=new ResizeObserver(resize);ro.observe(canvas);resize();upd
  const el=id=>document.getElementById(id);
  function openSetup(resetTeams){
   const splash=el('cinematicSplash'),menu=el('menu');
+  // Make the transition happen first; optional car/HUD refresh must never block the start menu.
+  if(splash){splash.classList.add('hidden');splash.style.pointerEvents='none';splash.setAttribute('aria-hidden','true');splash.style.display='none'}
+  if(menu){menu.classList.remove('hidden');menu.classList.add('cinematic-setup');menu.style.setProperty('display','flex','important');menu.style.setProperty('z-index','1000','important');menu.style.visibility='visible';menu.style.opacity='1';menu.style.pointerEvents='auto';menu.setAttribute('aria-label','Auto- en teamkeuze')}
+  const sub=el('setupDirections');
+  if(sub)sub.textContent='Kies je auto, stel de teams in en druk daarna op START MET …';
   if(resetTeams){
    const blue=el('blueCount'),orange=el('orangeCount');
    if(blue)blue.value='5';
    if(orange)orange.value='5';
-   if(typeof window.__BRChooseCar==='function')window.__BRChooseCar(0);
+   try{if(typeof window.__BRChooseCar==='function')window.__BRChooseCar(0)}catch(error){console.warn('Auto-selectie wordt na het openen hersteld:',error)}
   }
-  if(splash){splash.classList.add('hidden');splash.style.display='none';splash.style.pointerEvents='none';splash.setAttribute('aria-hidden','true')}
-  if(menu){menu.classList.remove('hidden');menu.classList.add('cinematic-setup');menu.style.setProperty('display','flex','important');menu.style.setProperty('z-index','1000','important');menu.style.visibility='visible';menu.style.opacity='1';menu.style.pointerEvents='auto';menu.setAttribute('aria-label','Auto- en teamkeuze')}
-  const sub=el('setupDirections');
-  if(sub)sub.textContent='Kies je auto, stel de teams in en druk daarna op START MET …';
  }
  window.__BROpenSetup=openSetup;
  // Capture phase makes the visible splash button work even if the original handler failed to attach.
