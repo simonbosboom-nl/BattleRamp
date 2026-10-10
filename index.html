@@ -613,6 +613,14 @@ try{
    else{const modal=el('shopModal');if(modal){modal.style.display='flex';modal.style.zIndex='2000';const items=el('shopItems');if(items)items.textContent='Winkel geopend; herlaad de game als de producten ontbreken.'}}
   }catch(error){console.error('Shop click error:',error);const modal=el('shopModal');if(modal){modal.style.display='flex';modal.style.zIndex='2000'}const items=el('shopItems');if(items)items.textContent='Winkel is geopend, maar de inhoud kon niet worden geladen.'}
  },true);
+ // Defensive delegated selection handler: keep car selection working if a card listener was lost.
+ document.addEventListener('click',event=>{
+  const card=event.target instanceof Element?event.target.closest('#carGrid .carPick[data-car]'):null;
+  if(!card)return;
+  if(typeof window.__BRChooseCar==='function'){
+   try{window.__BRChooseCar(Number(card.dataset.car))}catch(error){console.error('Auto selecteren mislukt:',error)}
+  }
+ },true);
  // Restore every splash property changed when entering the garage. The normal handler is kept too.
  document.addEventListener('click',event=>{
   const back=event.target instanceof Element?event.target.closest('#backSplashBtn'):null;
