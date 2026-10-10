@@ -7,7 +7,8 @@
 :root{--cyan:#3ce6ff;--orange:#ff9637;--panel:rgba(4,17,29,.88);--line:rgba(85,220,255,.35)}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#06131f;color:#effaff;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 #app{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 10%,#1a465e,#06131f 72%)}
-#gl{position:absolute;inset:0;width:100%;height:100%;display:block;outline:none}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;outline:none;z-index:0}
+#glFallback{position:absolute;inset:0;width:100%;height:100%;display:none;outline:none;z-index:1;pointer-events:none}
 header{position:absolute;left:0;right:0;top:0;z-index:4;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:14px 18px;background:linear-gradient(180deg,rgba(2,10,18,.82),rgba(2,10,18,.12),transparent);pointer-events:none}
 .brand{font-size:clamp(22px,3vw,38px);font-weight:1000;letter-spacing:-1.8px;line-height:.95;font-style:italic;text-shadow:0 3px 18px #0008}.brand span{color:var(--cyan)}.tag{font-size:10px;letter-spacing:3px;color:#b6d4e3;margin-top:7px;font-weight:800}.studio{font-size:9px;letter-spacing:2px;color:#49e5ff;margin-top:5px;font-weight:950;text-transform:uppercase;text-shadow:0 0 12px #27dfff35}.menuStudio{margin-top:9px;margin-bottom:2px}
 .hud{display:flex;gap:7px}.stat{min-width:70px;padding:9px 12px;border-radius:12px;border:1px solid #36748b;background:rgba(2,16,28,.76);box-shadow:0 8px 25px #0003;text-align:center}.stat label{display:block;font-size:9px;letter-spacing:1.6px;color:#aac6d4;font-weight:900}.stat strong{font-size:20px;line-height:1.25}.blue{color:var(--cyan)}.orange{color:var(--orange)}.boostbar{height:5px;width:100%;background:#203849;border-radius:8px;margin-top:4px;overflow:hidden}.boostbar i{display:block;width:100%;height:100%;background:var(--cyan);box-shadow:0 0 12px var(--cyan)}
@@ -22,7 +23,12 @@ header{position:absolute;left:0;right:0;top:0;z-index:4;display:flex;justify-con
 #rlScoreboard .timer small{color:#a8bed1}
 @media(max-width:700px){#rlScoreboard{top:55px;left:50%;}.hud .stat:nth-child(-n+3){display:none}.stat{min-width:48px}#topmsg{top:105px}}
 #bottom{position:absolute;z-index:4;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:22px 18px 16px;background:linear-gradient(0deg,rgba(2,9,15,.94),rgba(2,9,15,.4),transparent)}
-#instructions{font-size:12px;line-height:1.7;color:#d1e4ed;max-width:70%}kbd{background:#112d40;border:1px solid #456b7e;border-bottom-width:2px;border-radius:5px;padding:2px 5px;font-size:11px;font-weight:900;color:#fff}button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid #47768b;background:linear-gradient(#173e54,#0a2436);color:#f0fbff;padding:10px 13px;font-weight:850;box-shadow:0 5px 18px #0004;transition:filter .12s,transform .12s}button:hover{filter:brightness(1.2)}button:active{transform:translateY(1px)}button.primary{background:linear-gradient(#50e8ff,#13a9cf);color:#03121d;border:0}button:disabled{opacity:.5;cursor:default}
+#instructions{font-size:12px;line-height:1.7;color:#d1e4ed;max-width:70%}
+#carSwitcher{display:flex;align-items:center;gap:7px;min-height:30px;margin-bottom:3px}
+#carSwitcher button{padding:4px 8px;border-radius:7px;font-size:10px;min-width:30px;background:linear-gradient(#16435a,#0a2436);border-color:#3b8aa6}
+#carSwitcher #carName{min-width:108px;color:#f2fcff;font-weight:1000}
+#carSwitcher .carSwitchHint{font-size:10px;font-weight:850;color:#8fb8ca;white-space:nowrap}
+kbd{background:#112d40;border:1px solid #456b7e;border-bottom-width:2px;border-radius:5px;padding:2px 5px;font-size:11px;font-weight:900;color:#fff}button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid #47768b;background:linear-gradient(#173e54,#0a2436);color:#f0fbff;padding:10px 13px;font-weight:850;box-shadow:0 5px 18px #0004;transition:filter .12s,transform .12s}button:hover{filter:brightness(1.2)}button:active{transform:translateY(1px)}button.primary{background:linear-gradient(#50e8ff,#13a9cf);color:#03121d;border:0}button:disabled{opacity:.5;cursor:default}
 .actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;max-width:50%}
 #menu{position:absolute;z-index:6;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:linear-gradient(90deg,rgba(1,10,18,.73),rgba(3,14,24,.22),rgba(1,10,18,.73))}
 .menuCard{width:min(860px,96vw);max-height:92vh;overflow:auto;border-radius:24px;border:1px solid #4c96ad;background:linear-gradient(140deg,rgba(5,28,44,.97),rgba(3,12,23,.97));box-shadow:0 25px 100px #000a;padding:clamp(18px,3vw,32px)}
@@ -87,6 +93,7 @@ header{position:absolute;left:0;right:0;top:0;z-index:4;display:flex;justify-con
 </style></head>
 <body><div id="app">
 <canvas id="gl" aria-label="Battle Ramps 3D arena"></canvas>
+<canvas id="glFallback" aria-label="Battle Ramps arena in compatibility mode"></canvas>
 <div id="cinematicSplash" role="navigation" aria-label="Battle Ramps hoofdmenu">\n<div id="splashLogo" aria-hidden="true"><span class="splashWordBattle">BATTLE</span><span class="splashWordRamps">RAMPS</span></div>
 <div id="splashStudio" aria-label="Geproduceerd door Homework Ninja Studios">PRODUCED BY<strong>HOMEWORK NINJA STUDIOS</strong></div>
 <button type="button" class="splash-hotspot" id="splashStart" onclick="window.__BROpenSetup && window.__BROpenSetup(true)" aria-label="Speel: begin een wedstrijd" title="Begin een wedstrijd">▶ &nbsp; SPEEL</button>
@@ -101,7 +108,7 @@ header{position:absolute;left:0;right:0;top:0;z-index:4;display:flex;justify-con
 <div id="eventAlert" aria-live="polite"><strong id="eventTitle">DROPPING!!!</strong><span id="eventSub">Supply crate incoming</span></div>
 <div id="resourceHUD"><div class="resTitle">AUTO STATUS</div><div class="resRow"><span>❤️ HP</span><b id="hpText">110 / 110</b></div><div class="healthbar"><i id="hpBar"></i></div><div class="resRow"><span>🔫 Munitie</span><b id="ammoText">12</b></div><div class="resRow"><span>🪜 Schansen</span><b id="rampText">2</b></div><div class="resRow"><span>🏆 Wins</span><b id="winsText">0</b></div><button id="shopBtn">🛒 WINKEL</button></div>
 <div id="shopModal" class="modal" style="display:none"><div class="shopCard"><button class="closeShop" id="closeShop">✕</button><div class="shopKicker">HOMEWORK NINJA STUDIOS</div><h2>GARAGE & SHOP</h2><p>Koop versieringen met je verdiende wins. Je voortgang wordt op dit apparaat opgeslagen.</p><div class="shopBalance">Jouw saldo: <b id="shopWins">0</b> 🏆 wins</div><div id="shopItems" class="shopItems"></div><button id="backToGame" class="primary">TERUG NAAR DE GAME</button></div></div>
-<div id="bottom"><div id="instructions"><b id="carName">Rally GT</b><br><span class="desktop"><kbd>W</kbd>/<kbd>↑</kbd> gas · <kbd>S</kbd>/<kbd>↓</kbd> achteruit · <kbd>A</kbd>/<kbd>D</kbd> sturen · </span><kbd>SHIFT</kbd> turbo · <kbd>SPACE</kbd> wapen · <kbd>J</kbd> springen · <kbd>B</kbd> schans · <kbd>V</kbd> camerastand</div><div class="actions"><button id="buildBtn">＋ Schans [B]</button><button id="fireBtn">⚡ Wapen [Space]</button><button id="cameraBtn">Camera: Cockpit [V]</button><button id="pauseBtn">Ⅱ Pauze</button></div></div>
+<div id="bottom"><div id="instructions"><div id="carSwitcher"><button id="carPrevBtn" type="button" aria-label="Vorige auto">◀</button><b id="carName">Rally GT</b><button id="carNextBtn" type="button" aria-label="Volgende auto">AUTO ▶</button><span class="carSwitchHint">[1–5]</span></div><span class="desktop"><kbd>W</kbd>/<kbd>↑</kbd> gas · <kbd>S</kbd>/<kbd>↓</kbd> achteruit · <kbd>A</kbd>/<kbd>D</kbd> sturen · </span><kbd>SHIFT</kbd> turbo · <kbd>SPACE</kbd> wapen · <kbd>J</kbd> springen · <kbd>B</kbd> schans · <kbd>V</kbd> camerastand</div><div class="actions"><button id="buildBtn">＋ Schans [B]</button><button id="fireBtn">⚡ Wapen [Space]</button><button id="cameraBtn">Camera: Cockpit [V]</button><button id="pauseBtn">Ⅱ Pauze</button></div></div>
 <div id="touch"><div class="touchcol"><span></span><button data-key="w">▲</button><span></span><button data-key="a">◀</button><button data-key="s">▼</button><button data-key="d">▶</button></div><div class="touchRight"><button data-key="shift">⚡ TURBO</button><button data-action="shoot">⚡ WAPEN</button><button data-action="jump">↟ SPRING</button><button data-action="build">＋ BOUW SCHANS</button></div></div>
 <div id="menu"><div class="menuCard"><p class="menuTitle">BATTLE <span>RAMPS</span></p><div class="studio menuStudio">PRODUCED BY HOMEWORK NINJA STUDIOS</div><div class="setupIntro"><div class="setupStep">STAP 1 VAN 2 <span>GARAGE</span></div><div class="setupHeadline">Kies je auto</div><div class="setupSubline">Klik op een auto-kaart. Stel daarna beide teams in en druk op de startknop.</div><div class="selectedCarPanel"><div class="selectedCarArt" id="selectedCarArt" aria-hidden="true"></div><div class="selectedCarCopy"><span class="selectedEyebrow">JOUW GESELECTEERDE AUTO</span><strong id="selectedCarName">Rally GT</strong><span id="selectedCarDetails">Gebalanceerd · 110 HP · Topsnelheid 25</span><span class="selectedCarNudge">✓ De kaart met de blauwe rand is geselecteerd</span></div></div></div><div class="subtitle" id="setupDirections">STAP 2 VAN 2 — Kies hoeveel auto’s elk team heeft. Je gekozen auto staat in de startknop; de wedstrijd duurt 5 minuten.</div><div class="carGrid" id="carGrid"></div>
 <div class="setupStatus" id="setupStatus" aria-live="polite">Gekozen: <strong>Rally GT</strong> · <strong>5v5</strong> · 5 minuten</div><div class="settingsGrid">
@@ -115,6 +122,7 @@ header{position:absolute;left:0;right:0;top:0;z-index:4;display:flex;justify-con
 (()=>{
 'use strict';
 const canvas=document.getElementById('gl');
+const fallbackCanvas=document.getElementById('glFallback');
 const $=id=>document.getElementById(id);
 const TYPES=[
 {name:'Rally GT',color:'#20cfff',max:25,acc:17,turn:2.35,boost:100,weight:1,style:0,hp:110,desc:'Gebalanceerd · 110 HP'},
@@ -136,6 +144,7 @@ const V=(x=0,y=0,z=0)=>({x,y,z});
 // Expose core actions for the independent startup/input guard below.
 window.__BRStartGame=()=>startGame();
 window.__BRChooseCar=(i)=>chooseCar(i);
+window.__BRChangeCar=(i)=>changeCar(i);
 window.__BRBuildRamp=()=>buildRamp();
 function say(s,hold=2.5){toast=s;msgHold=hold;$('topmsg').textContent=s}
 function updateHUD(){
@@ -163,6 +172,21 @@ function startGame(){clock=300;blue=orange=0;boost=TYPES[selected].boost;gameOve
 function carSvg(t,suffix){const id='paint-'+suffix;return `<svg viewBox="0 0 180 76" class="carThumb" role="img" aria-label="${t.name} auto-preview"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5fbff"/><stop offset=".13" stop-color="${t.color}"/><stop offset=".58" stop-color="${t.color}"/><stop offset="1" stop-color="${shadeHex(t.color,.38)}"/></linearGradient><linearGradient id="glass-${suffix}" x1="0" x2="1"><stop stop-color="#7bdaf4"/><stop offset=".45" stop-color="#17334a"/><stop offset="1" stop-color="#020915"/></linearGradient></defs><ellipse cx="90" cy="63" rx="64" ry="7" fill="#0008"/><g stroke="#d9f8ff" stroke-opacity=".72" stroke-width="1.4"><path d="M28 46 L35 31 Q39 25 54 24 L71 12 Q78 7 100 9 L126 21 Q137 26 145 38 L154 46 L151 55 L28 55 Z" fill="url(#${id})"/><path d="M65 24 L77 13 Q82 11 98 13 L119 23 L119 29 L60 29 Z" fill="url(#glass-${suffix})"/><path d="M36 36 L55 33 L59 39 L36 42 Z" fill="#f4ffff" stroke="#b8f8ff"/><path d="M126 35 L143 39 L149 46 L129 44 Z" fill="#ff354f" stroke="#ff9aa6"/><path d="M68 16 L70 28 M122 26 L127 38" fill="none" stroke="#ffffff" stroke-opacity=".65"/></g><g fill="#080f19" stroke="#a7bbc6" stroke-width="2"><rect x="36" y="43" width="23" height="18" rx="6"/><rect x="121" y="43" width="23" height="18" rx="6"/></g><g fill="#708793" stroke="#f5fcff" stroke-width="1.4"><circle cx="47.5" cy="52" r="5.8"/><circle cx="132.5" cy="52" r="5.8"/></g><path d="M51 47 L52 57 M43 52 L52 52 M128 47 L137 57 M128 53 L137 49" stroke="#dceef3" stroke-width="1.2"/><path d="M70 49 L109 49 L104 53 L75 53 Z" fill="#f2fcff" opacity=".82"/><path d="M73 39 L109 39" stroke="#061622" stroke-width="3"/><path d="M28 47 L18 44 L20 40 L34 41" fill="#dbe8ee"/><path d="M152 46 L164 43 L163 47 L153 51" fill="${t.color}"/></svg>`}
 function syncCarSelection(){document.querySelectorAll('.carPick').forEach((b,j)=>{b.classList.toggle('selected',j===selected);b.setAttribute('aria-pressed',String(j===selected))});const t=TYPES[selected];$('carName').textContent=t.name;$('selectedCarName').textContent=t.name;$('selectedCarDetails').textContent=`${t.desc} · Topsnelheid ${t.max} · Turbo ${t.boost}`;$('selectedCarArt').innerHTML=carSvg(t,'hero'+selected);$('startBtn').textContent=`START MET ${t.name.toUpperCase()} →`;const status=$('setupStatus');if(status)status.innerHTML=`Gekozen: <strong>${t.name}</strong> · <strong>${$('blueCount').value}v${$('orangeCount').value}</strong> · 5 minuten`}
 function chooseCar(i){selected=clamp(i,0,TYPES.length-1);boost=TYPES[selected].boost;syncCarSelection();updateHUD()}
+function changeCar(i){
+ selected=(i+TYPES.length)%TYPES.length;
+ const t=TYPES[selected];
+ if(playing){
+  player.maxHp=t.hp;
+  player.hp=Math.min(player.hp,t.hp);
+  boost=Math.min(boost,t.boost);
+  player.speed=clamp(player.speed,-t.max*.38,t.max*1.36);
+  say('Auto gewisseld naar '+t.name,2.0);
+ }else boost=t.boost;
+ syncCarSelection();
+ updateHUD();
+}
+$('carPrevBtn').addEventListener('click',()=>changeCar(selected-1));
+$('carNextBtn').addEventListener('click',()=>changeCar(selected+1));
 $('carGrid').innerHTML=TYPES.map((t,i)=>`<button type="button" class="carPick ${i===0?'selected':''}" data-car="${i}" aria-pressed="${i===0?'true':'false'}">${carSvg(t,'card'+i)}<span class="carLabel"><b>${t.name}</b><span class="carChosen">✓ GEKOZEN</span></span><small>${t.desc}<br>Topsnelheid ${t.max} · Turbo ${t.boost}</small></button>`).join('');document.querySelectorAll('.carPick').forEach(b=>b.addEventListener('click',()=>chooseCar(+b.dataset.car)));syncCarSelection();
 
 function leaveSplash(){const s=$('cinematicSplash');s.classList.add('hidden');setTimeout(()=>{if(s.classList.contains('hidden'))s.style.display='none'},260)}
@@ -180,7 +204,7 @@ $('cameraBtn').addEventListener('click',()=>{followCam=!followCam;updateCameraBu
 $('pauseBtn').addEventListener('click',()=>{if(!playing)return;paused=!paused;$('pauseBtn').textContent=paused?'▶ Verder':'Ⅱ Pauze';say(paused?'Spel gepauzeerd':'Verder spelen')});
 $('shopBtn').addEventListener('click',openShop);$('menuShopBtn').addEventListener('click',openShop);$('closeShop').addEventListener('click',closeShop);$('backToGame').addEventListener('click',closeShop);$('shopItems').addEventListener('click',e=>{const b=e.target.closest('[data-shop]');if(!b)return;const it=SHOP_ITEMS.find(q=>q.id===b.dataset.shop);if(!it)return;if(ownedCosmetics.includes(it.id)){equippedCosmetic=it.id;saveProgress();say('Uitgerust: '+it.name);renderShop();return}if(wins<it.price){say('Je hebt '+it.price+' wins nodig voor '+it.name+'.');return}wins-=it.price;ownedCosmetics.push(it.id);equippedCosmetic=it.id;saveProgress();renderShop();say(it.name+' gekocht en uitgerust!')});
 function updateCameraButton(){$('cameraBtn').textContent=!gl?(followCam?'Camera: achter [V]':'Camera: overzicht [V]'):(followCam?'Camera: achter [V]':'Camera: Cockpit [V]')}
-window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(e.repeat)return;if(k==='b')buildRamp();if(k===' '||k==='f')fireWeapon();if(k==='j')jump();if(k==='v'){followCam=!followCam;updateCameraButton()}if(k==='escape'&&playing){paused=!paused;$('pauseBtn').textContent=paused?'▶ Verder':'Ⅱ Pauze'}});
+window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(e.repeat)return;if(/^[1-5]$/.test(k)){changeCar(Number(k)-1);return}if(k==='b')buildRamp();if(k===' '||k==='f')fireWeapon();if(k==='j')jump();if(k==='v'){followCam=!followCam;updateCameraButton()}if(k==='escape'&&playing){paused=!paused;$('pauseBtn').textContent=paused?'▶ Verder':'Ⅱ Pauze'}});
 window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});window.addEventListener('blur',()=>{for(const k in keys)keys[k]=false});
 document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;const on=e=>{e.preventDefault();keys[k]=true};const off=e=>{e.preventDefault();keys[k]=false};b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('pointerleave',off)});
 document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();({shoot:fireWeapon,jump,build:buildRamp}[b.dataset.action]||(()=>{}))()}));
@@ -367,9 +391,9 @@ function makeTurfTile(){const cv=document.createElement('canvas');cv.width=cv.he
 function renderFallback2D(){
  if(!fallbackCtx)return;
  if(!turfTile)turfTile=makeTurfTile();if(!turfPattern)turfPattern=fallbackCtx.createPattern(turfTile,'repeat');
- const c=fallbackCtx,dpr=Math.min(window.devicePixelRatio||1,1.5),w=Math.max(1,Math.floor(canvas.clientWidth*dpr)),h=Math.max(1,Math.floor(canvas.clientHeight*dpr));
- if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}
- c.setTransform(dpr,0,0,dpr,0,0);const W=canvas.clientWidth||1000,H=canvas.clientHeight||600;
+ const c=fallbackCtx,dpr=Math.min(window.devicePixelRatio||1,1.5),w=Math.max(1,Math.floor(fallbackCanvas.clientWidth*dpr)),h=Math.max(1,Math.floor(fallbackCanvas.clientHeight*dpr));
+ if(fallbackCanvas.width!==w||fallbackCanvas.height!==h){fallbackCanvas.width=w;fallbackCanvas.height=h}
+ c.setTransform(dpr,0,0,dpr,0,0);const W=fallbackCanvas.clientWidth||1000,H=fallbackCanvas.clientHeight||600;
  c.clearRect(0,0,W,H);
  const sky=c.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#07111e');sky.addColorStop(.43,'#17394d');sky.addColorStop(1,'#06131d');c.fillStyle=sky;c.fillRect(0,0,W,H);
  // Stadium bowl, spectator tiers and lights.
@@ -581,8 +605,8 @@ if(Math.abs(ball.z)>41.1){ball.z=clamp(ball.z,-41.1,41.1);ball.vz*=-.75}
 if(goalCooldown<=0&&Math.abs(ball.z)<8.25&&ball.x>69){resetAfterGoal('blue');return}if(goalCooldown<=0&&Math.abs(ball.z)<8.25&&ball.x< -69){resetAfterGoal('orange');return}if(Math.abs(ball.x)>67.1){ball.x=clamp(ball.x,-67.1,67.1);ball.vx*=-.72}
 for(const a of particles){a.x+=a.vx*dt;a.y+=a.vy*dt;a.z+=a.vz*dt;a.vy-=7*dt;a.life-=dt}for(let i=particles.length-1;i>=0;i--)if(particles[i].life<=0)particles.splice(i,1);if(msgHold>0)msgHold-=dt;else if(!paused)$('topmsg').textContent=followCam?'CHASE CAMERA · V = COCKPIT VIEW':'COCKPIT VIEW · V = CHASE CAMERA';updateHUD()}
 function loop(now){const dt=Math.min(.033,Math.max(.001,(now-last)/1000||.016));last=now;try{update(dt);render()}catch(e){console.error(e);say('Er ging iets mis in de 3D-renderer. Probeer opnieuw te starten.',99)}requestAnimationFrame(loop)}
-function resize(){const dpr=Math.min(window.devicePixelRatio||1,1.5);const w=Math.max(1,Math.floor(canvas.clientWidth*dpr)),h=Math.max(1,Math.floor(canvas.clientHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;if(gl)gl.viewport(0,0,w,h)}}
-try{initGL();const ro=new ResizeObserver(resize);ro.observe(canvas);resize();updateCameraButton();updateHUD();last=performance.now();requestAnimationFrame(loop)}catch(e){console.warn('3D renderer not available; using 2D compatibility renderer:',e.message);fallbackCtx=canvas.getContext('2d');if(fallbackCtx){$('fallback').style.display='none';resize();updateCameraButton();updateHUD();say('Compatibiliteitsmodus actief: 2D-perspectief. Schakel WebGL/hardwareversnelling in voor de volledige 3D-weergave.',6);last=performance.now();requestAnimationFrame(loop)}else{$('fallback').style.display='block';$('fallback').querySelector('p').textContent='Deze browser kan geen 3D- of 2D-renderer starten.'}}
+function resize(){const dpr=Math.min(window.devicePixelRatio||1,1.5);const w=Math.max(1,Math.floor(canvas.clientWidth*dpr)),h=Math.max(1,Math.floor(canvas.clientHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;if(gl)gl.viewport(0,0,w,h)}if(fallbackCanvas.style.display!=='none'){const fw=Math.max(1,Math.floor(fallbackCanvas.clientWidth*dpr)),fh=Math.max(1,Math.floor(fallbackCanvas.clientHeight*dpr));if(fallbackCanvas.width!==fw||fallbackCanvas.height!==fh){fallbackCanvas.width=fw;fallbackCanvas.height=fh}}}
+try{initGL();const ro=new ResizeObserver(resize);ro.observe(canvas);resize();updateCameraButton();updateHUD();last=performance.now();requestAnimationFrame(loop)}catch(e){console.warn('3D-renderer niet beschikbaar; 2D-fallback wordt gestart:',e.message);gl=null;fallbackCtx=fallbackCanvas.getContext('2d');if(fallbackCtx){$('fallback').style.display='none';fallbackCanvas.style.display='block';resize();updateCameraButton();updateHUD();say('Compatibiliteitsmodus actief: speelveld in 2D-perspectief.',6);last=performance.now();requestAnimationFrame(loop)}else{$('fallback').style.display='block';$('fallback').querySelector('p').textContent='De arena kon niet worden weergegeven. Probeer een browser met canvas-ondersteuning.'}}
 })();
 </script>
 <script id="battleRampsInputGuard">
