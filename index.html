@@ -39,22 +39,25 @@ header{position:absolute;left:0;right:0;top:0;z-index:4;display:flex;justify-con
 #cinematicSplash{position:absolute;inset:0;z-index:30;overflow:hidden;opacity:1;background:#020913;background-image:linear-gradient(90deg,rgba(2,7,14,.16),transparent 65%),url("assets/battle-ramps-stadium.webp");background-size:cover;background-position:center top;transition:opacity .24s ease;}
 #cinematicSplash:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(2,8,16,.6),transparent 22%,transparent 72%,rgba(2,8,16,.07));pointer-events:none}
 #cinematicSplash.hidden{opacity:0;pointer-events:none}
-.splash-hotspot{position:absolute;z-index:2;border:1px solid transparent;border-radius:10px;background:rgba(0,0,0,0);padding:0;box-shadow:none;color:transparent;cursor:pointer;outline-offset:2px;}
-.splash-hotspot:hover,.splash-hotspot:focus-visible{border-color:#ffd15b;background:rgba(255,191,51,.12);box-shadow:0 0 20px #ffb92855,inset 0 0 14px #ffdb6a24;outline:1px solid #ffe59a}
-.splash-hotspot:active{background:rgba(49,220,255,.22)}
+.splash-hotspot{position:absolute;z-index:5;display:flex;align-items:center;justify-content:flex-start;gap:12px;padding:0 0 0 clamp(12px,1.4vw,24px);border:1px solid rgba(196,229,244,.58);border-radius:7px;color:#f4faff;background:linear-gradient(100deg,rgba(3,13,24,.97),rgba(6,24,37,.94));box-shadow:0 5px 17px #0009,inset 0 1px 0 #ffffff18;font:1000 clamp(12px,1.1vw,17px)/1 system-ui,sans-serif;letter-spacing:1.2px;text-transform:uppercase;text-shadow:0 2px 5px #000;cursor:pointer;outline-offset:3px;clip-path:polygon(4% 0,100% 0,94% 100%,0 100%);transition:filter .14s,transform .14s,box-shadow .14s}
+.splash-hotspot:hover,.splash-hotspot:focus-visible{filter:brightness(1.14);box-shadow:0 0 0 2px #ffdf88,0 0 22px #ffb92866;outline:2px solid #ffe59a}
+.splash-hotspot:active{filter:brightness(1.25);transform:translateY(1px)}
+#splashStart{background:linear-gradient(105deg,#ffdf55,#ffb900 78%,#db8500);border-color:#fff0a0;color:#111f2a;text-shadow:none;box-shadow:0 6px 20px #0009,0 0 20px #ffc32d44}
+#splashStart:hover,#splashStart:focus-visible{background:linear-gradient(105deg,#ffec83,#ffc72e 78%,#f39a13);box-shadow:0 0 0 2px #fff0a0,0 0 25px #ffc32d88}
 #splashStart{left:2.0%;top:49.0%;width:24.8%;height:7.2%}
 #splashGarage{left:2.0%;top:63.7%;width:24.8%;height:7.0%}
 #splashShop{left:2.0%;top:56.5%;width:24.8%;height:7.0%}
 #splashSettings{left:2.0%;top:70.9%;width:24.8%;height:7.0%}
 #splashExit{left:2.0%;top:78.1%;width:24.8%;height:7.2%}
-#splashStudio{position:absolute;z-index:2;left:4.2%;top:38.5%;max-width:31%;padding:7px 11px;border-left:3px solid #ffbd43;background:linear-gradient(90deg,rgba(3,12,24,.80),rgba(3,12,24,.22));color:#d9eaf4;font:800 clamp(9px,1vw,13px)/1.2 system-ui,sans-serif;letter-spacing:1.3px;text-shadow:0 2px 8px #000;pointer-events:none}
-#splashStudio strong{display:block;margin-top:3px;color:#fff;font-size:clamp(11px,1.45vw,18px);letter-spacing:1.8px}
+#splashStudio{position:absolute;z-index:4;left:50%;top:auto;bottom:4.6%;transform:translateX(-50%);width:min(440px,90vw);max-width:90vw;padding:8px 16px;border:1px solid rgba(255,196,73,.78);border-radius:8px;background:linear-gradient(90deg,rgba(2,11,21,.96),rgba(6,23,36,.94));color:#bcd5e2;text-align:center;font:900 clamp(9px,1vw,13px)/1.15 system-ui,sans-serif;letter-spacing:2px;text-shadow:0 2px 8px #000;pointer-events:none;box-shadow:0 5px 20px #0008}
+#splashStudio strong{display:block;margin-top:4px;color:#fff;font-size:clamp(12px,1.5vw,19px);letter-spacing:2.2px;text-shadow:0 0 12px #ffd05d33}
 #splashFooter{position:absolute;z-index:2;left:2.5%;right:2.5%;bottom:1.4%;display:flex;justify-content:space-between;gap:12px;align-items:center;color:#d9f8ff;font:800 10px/1.2 system-ui,sans-serif;letter-spacing:1.2px;text-shadow:0 2px 8px #000;pointer-events:none}
 #splashFooter span:last-child{text-align:right;color:#b8d0df}
 #menu.cinematic-setup{z-index:21;background:rgba(0,7,15,.54);backdrop-filter:blur(7px)}
 #menu.cinematic-setup .menuCard{border-color:#73e9ff;background:linear-gradient(145deg,rgba(5,26,42,.95),rgba(3,10,20,.96));box-shadow:0 0 0 1px #47dfff26,0 30px 100px #000d}
 #menu.cinematic-setup .menuTitle{text-shadow:0 4px 18px #000}
-@media(max-width:700px){#cinematicSplash{background-position:34% top}#splashStart{left:2%;top:49%;width:39%;height:7.2%}#splashGarage{left:2%;top:63.7%;width:39%;height:7%}#splashShop{left:2%;top:56.5%;width:39%;height:7%}#splashSettings{left:2%;top:70.9%;width:39%;height:7%}#splashExit{left:2%;top:78.1%;width:39%;height:7.2%}#splashStudio{left:3%;top:38%;max-width:44%;padding:5px 7px;letter-spacing:.7px}#splashStudio strong{letter-spacing:.9px}#splashFooter{font-size:8px;letter-spacing:.4px;bottom:5px}}
+@media(max-width:700px){#cinematicSplash{background-position:34% top}#splashStart{left:2%;top:49%;width:39%;height:7.2%}#splashGarage{left:2%;top:63.7%;width:39%;height:7%}#splashShop{left:2%;top:56.5%;width:39%;height:7%}#splashSettings{left:2%;top:70.9%;width:39%;height:7%}#splashExit{left:2%;top:78.1%;width:39%;height:7.2%}#splashStudio{left:50%;top:auto;bottom:6%;width:min(390px,92vw);max-width:92vw;padding:6px 9px;letter-spacing:1px}#splashStudio strong{font-size:12px;letter-spacing:1.3px}#splashFooter{font-size:8px;letter-spacing:.4px;bottom:5px}
+#splashStart{min-height:45px}#splashGarage,#splashShop,#splashSettings,#splashExit{min-height:38px}}
 
 /* Battle Ramps setup clarity upgrade */
 .menuCard{width:min(1040px,96vw);max-height:92vh;padding:clamp(16px,2.3vw,28px)}
@@ -81,11 +84,11 @@ header{position:absolute;left:0;right:0;top:0;z-index:4;display:flex;justify-con
 <canvas id="gl" aria-label="Battle Ramps 3D arena"></canvas>
 <div id="cinematicSplash" role="navigation" aria-label="Battle Ramps hoofdmenu">
 <div id="splashStudio" aria-label="Geproduceerd door Homework Ninja Studios">PRODUCED BY<strong>HOMEWORK NINJA STUDIOS</strong></div>
-<button type="button" class="splash-hotspot" id="splashStart" aria-label="Start wedstrijd" title="Start wedstrijd">Start wedstrijd</button>
-<button type="button" class="splash-hotspot" id="splashGarage" aria-label="Garage en auto kiezen" title="Garage">Garage</button>
-<button type="button" class="splash-hotspot" id="splashShop" aria-label="Winkel openen" title="Winkel">Winkel</button>
-<button type="button" class="splash-hotspot" id="splashSettings" aria-label="Instellingen en teamgrootte" title="Instellingen">Instellingen</button>
-<button type="button" class="splash-hotspot" id="splashExit" aria-label="Spel afsluiten" title="Afsluiten">Afsluiten</button>
+<button type="button" class="splash-hotspot" id="splashStart" aria-label="Speel: begin een wedstrijd" title="Begin een wedstrijd">▶ &nbsp; SPEEL</button>
+<button type="button" class="splash-hotspot" id="splashGarage" aria-label="Garage en auto kiezen" title="Kies je auto">▣ &nbsp; GARAGE</button>
+<button type="button" class="splash-hotspot" id="splashShop" aria-label="Winkel openen" title="Open de winkel">🛒 &nbsp; WINKEL</button>
+<button type="button" class="splash-hotspot" id="splashSettings" aria-label="Instellingen en teamgrootte" title="Instellingen">⚙ &nbsp; INSTELLINGEN</button>
+<button type="button" class="splash-hotspot" id="splashExit" aria-label="Spel afsluiten" title="Afsluiten">↪ &nbsp; AFSLUITEN</button>
 <div id="splashFooter"><span>RACE · JUMP · SHOOT · WIN</span><span>SPEELBARE PROTOTYPE · BATTLE RAMPS</span></div>
 </div>
 <header><div><div class="brand">BATTLE <span>RAMPS</span><sup style="font-size:12px;letter-spacing:0"> 3D</sup></div><div class="tag">DRIVE · BUILD · BLAST · SCORE</div><div class="studio">PRODUCED BY HOMEWORK NINJA STUDIOS</div></div><div class="hud"><div class="stat"><label id="blueLabel">BLUE TEAM</label><strong class="blue" id="blueScore">0</strong></div><div class="stat"><label id="orangeLabel">ORANGE TEAM</label><strong class="orange" id="orangeScore">0</strong></div><div class="stat"><label>TIME</label><strong id="time">300</strong></div><div class="stat"><label>BOOST</label><strong id="boostText">100%</strong><div class="boostbar"><i id="boostBar"></i></div></div></div></header>
@@ -94,7 +97,7 @@ header{position:absolute;left:0;right:0;top:0;z-index:4;display:flex;justify-con
 <div id="resourceHUD"><div class="resTitle">AUTO STATUS</div><div class="resRow"><span>❤️ HP</span><b id="hpText">110 / 110</b></div><div class="healthbar"><i id="hpBar"></i></div><div class="resRow"><span>🔫 Munitie</span><b id="ammoText">12</b></div><div class="resRow"><span>🪜 Schansen</span><b id="rampText">2</b></div><div class="resRow"><span>🏆 Wins</span><b id="winsText">0</b></div><button id="shopBtn">🛒 WINKEL</button></div>
 <div id="shopModal" class="modal" style="display:none"><div class="shopCard"><button class="closeShop" id="closeShop">✕</button><div class="shopKicker">HOMEWORK NINJA STUDIOS</div><h2>GARAGE & SHOP</h2><p>Koop versieringen met je verdiende wins. Je voortgang wordt op dit apparaat opgeslagen.</p><div class="shopBalance">Jouw saldo: <b id="shopWins">0</b> 🏆 wins</div><div id="shopItems" class="shopItems"></div><button id="backToGame" class="primary">TERUG NAAR DE GAME</button></div></div>
 <div id="bottom"><div id="instructions"><b id="carName">Rally GT</b><br><span class="desktop"><kbd>W</kbd>/<kbd>↑</kbd> gas · <kbd>S</kbd>/<kbd>↓</kbd> achteruit · <kbd>A</kbd>/<kbd>D</kbd> sturen · </span><kbd>SHIFT</kbd> turbo · <kbd>SPACE</kbd> wapen · <kbd>J</kbd> springen · <kbd>B</kbd> schans · <kbd>V</kbd> camerastand</div><div class="actions"><button id="buildBtn">＋ Schans [B]</button><button id="fireBtn">⚡ Wapen [Space]</button><button id="cameraBtn">Camera: Cockpit [V]</button><button id="pauseBtn">Ⅱ Pauze</button></div></div>
-<div id="touch"><div class="touchcol"><span></span><button data-key="w">▲</button><span></span><button data-key="a">◀</button><button data-key="s">▼</button><button data-key="d">▶</button></div><div class="touchRight"><button data-key="shift">⚡ TURBO</button><button data-action="shoot">⚡ WAPEN</button><button data-action="jump">↟ SPRING</button><button data-action="build">＋ SCHANS</button></div></div>
+<div id="touch"><div class="touchcol"><span></span><button data-key="w">▲</button><span></span><button data-key="a">◀</button><button data-key="s">▼</button><button data-key="d">▶</button></div><div class="touchRight"><button data-key="shift">⚡ TURBO</button><button data-action="shoot">⚡ WAPEN</button><button data-action="jump">↟ SPRING</button><button data-action="build">＋ BOUW SCHANS</button></div></div>
 <div id="menu"><div class="menuCard"><p class="menuTitle">BATTLE <span>RAMPS</span></p><div class="studio menuStudio">PRODUCED BY HOMEWORK NINJA STUDIOS</div><div class="setupIntro"><div class="setupStep">STAP 1 VAN 2 <span>GARAGE</span></div><div class="setupHeadline">Kies je auto</div><div class="setupSubline">Klik op een auto-kaart. Stel daarna beide teams in en druk op de startknop.</div><div class="selectedCarPanel"><div class="selectedCarArt" id="selectedCarArt" aria-hidden="true"></div><div class="selectedCarCopy"><span class="selectedEyebrow">JOUW GESELECTEERDE AUTO</span><strong id="selectedCarName">Rally GT</strong><span id="selectedCarDetails">Gebalanceerd · 110 HP · Topsnelheid 25</span><span class="selectedCarNudge">✓ De kaart met de blauwe rand is geselecteerd</span></div></div></div><div class="subtitle" id="setupDirections">STAP 2 VAN 2 — Kies hoeveel auto’s elk team heeft. Je gekozen auto staat in de startknop; de wedstrijd duurt 5 minuten.</div><div class="carGrid" id="carGrid"></div>
 <div class="setupStatus" id="setupStatus" aria-live="polite">Gekozen: <strong>Rally GT</strong> · <strong>5v5</strong> · 5 minuten</div><div class="settingsGrid">
 <label class="setting">AANTAL AUTO'S — BLAUW (inclusief jij)<select id="blueCount"><option value="1">1 auto — 1v1</option><option value="2">2 auto's — 2v2</option><option value="3" selected>3 auto's — 3v3</option><option value="4">4 auto's — 4v4</option><option value="5">5 auto's — 5v5</option></select></label>
@@ -130,7 +133,7 @@ function updateHUD(){
 $('blueScore').textContent=blue;$('orangeScore').textContent=orange;$('time').textContent=Math.ceil(clock);$('rlBlueScore').textContent=blue;$('rlOrangeScore').textContent=orange;const secs=Math.max(0,Math.ceil(clock));$('rlTimer').textContent=Math.floor(secs/60)+':'+String(secs%60).padStart(2,'0');
 const max=TYPES[selected].boost;const pct=clamp(boost/max*100,0,100);$('boostText').textContent=Math.round(pct)+'%';$('boostBar').style.width=pct+'%';$('carName').textContent=TYPES[selected].name;
 $('blueLabel').textContent='BLUE TEAM · '+$('blueCount').value;$('orangeLabel').textContent='ORANGE TEAM · '+$('orangeCount').value;
-$('hpText').textContent=Math.max(0,Math.ceil(player.hp))+' / '+player.maxHp;$('hpBar').style.width=clamp(player.hp/player.maxHp*100,0,100)+'%';$('ammoText').textContent=player.ammo;$('rampText').textContent=player.rampStock;$('buildBtn').textContent='＋ Schans ['+player.rampStock+'] [B]';$('buildBtn').title='Bouw zelf een schans vóór je auto en rijd erover voor een sprongboost.';$('winsText').textContent=wins;$('menuWins').textContent='🏆 '+wins+' wins';$('shopWins').textContent=wins;
+$('hpText').textContent=Math.max(0,Math.ceil(player.hp))+' / '+player.maxHp;$('hpBar').style.width=clamp(player.hp/player.maxHp*100,0,100)+'%';$('ammoText').textContent=player.ammo;$('rampText').textContent=player.rampStock;$('buildBtn').textContent='＋ BOUW SCHANS ['+player.rampStock+'] [B]';$('buildBtn').title='Bouw zelf een schans vóór je auto en rijd erover voor een sprongboost.';$('winsText').textContent=wins;$('menuWins').textContent='🏆 '+wins+' wins';$('shopWins').textContent=wins;
 }
 const LANES=[-18,-8,8,18];
 function makeAI(team,index,count){
@@ -486,7 +489,7 @@ function buildRamp(){
  if(player.rampStock<=0)return say('Geen schansen meer! Pak een supply drop voor extra schansen.');
  if(ramps.length>=8)return say('Maximaal acht zelfgebouwde schansen tegelijk.');
  const f=forward(player.yaw);
- ramps.push({x:player.x+f.x*8,z:player.z+f.z*8,yaw:player.yaw,life:55,used:false,color:'#42ddff'});
+ ramps.push({x:player.x+f.x*7,z:player.z+f.z*7,yaw:player.yaw,life:55,used:false,color:'#42ddff'});
  player.rampStock--;
  say('SCHANS GEBOUWD! Rij eroverheen voor een sprongboost. Nog '+player.rampStock+' over.',3.3);
  updateHUD()
