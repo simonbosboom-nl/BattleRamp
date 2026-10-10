@@ -173,7 +173,19 @@ function resetPositions(){
 }
 function startGame(){if(!selectedCarConfirmed){const menu=$('menu');if(menu){menu.style.display='flex';menu.classList.add('cinematic-setup');menu.style.zIndex='1000';}say('Kies eerst een auto: klik op een van de vijf auto-kaarten.',5);$('carGrid').querySelector('.carPick')?.focus({preventScroll:true});return}rendererVerified=false;clock=300;blue=orange=0;boost=TYPES[selected].boost;gameOver=false;paused=false;playing=true;minuteWarning=false;dropTimer=14;dropIncoming=0;alertTimer=0;drops.length=0;resetPositions();player.hp=TYPES[selected].hp;player.maxHp=TYPES[selected].hp;player.ammo=12;player.rampStock=2;for(const a of [...blueMates,...orangeBots]){a.hp=a.maxHp;a.ammo=7;a.rampStock=1;} $('menu').querySelector('.subtitle').textContent='Grote arena met realistische grasstructuur, supply drops, beperkte kogels en schansen, 5 minuten speeltijd, health per auto en een garage met cosmetische upgrades. Kies 1 t/m 5 auto’s per team.';$('menu').style.display='none';$('pauseBtn').textContent='Ⅱ Pauze';last=performance.now();say(`${$('blueCount').value}v${$('orangeCount').value} gestart! Verzamel supply drops voor munitie en schansen.`,4);updateCameraButton();updateHUD()}
 function carSvg(t,suffix){const id='paint-'+suffix;return `<svg viewBox="0 0 180 76" class="carThumb" role="img" aria-label="${t.name} auto-preview"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5fbff"/><stop offset=".13" stop-color="${t.color}"/><stop offset=".58" stop-color="${t.color}"/><stop offset="1" stop-color="${shadeHex(t.color,.38)}"/></linearGradient><linearGradient id="glass-${suffix}" x1="0" x2="1"><stop stop-color="#7bdaf4"/><stop offset=".45" stop-color="#17334a"/><stop offset="1" stop-color="#020915"/></linearGradient></defs><ellipse cx="90" cy="63" rx="64" ry="7" fill="#0008"/><g stroke="#d9f8ff" stroke-opacity=".72" stroke-width="1.4"><path d="M28 46 L35 31 Q39 25 54 24 L71 12 Q78 7 100 9 L126 21 Q137 26 145 38 L154 46 L151 55 L28 55 Z" fill="url(#${id})"/><path d="M65 24 L77 13 Q82 11 98 13 L119 23 L119 29 L60 29 Z" fill="url(#glass-${suffix})"/><path d="M36 36 L55 33 L59 39 L36 42 Z" fill="#f4ffff" stroke="#b8f8ff"/><path d="M126 35 L143 39 L149 46 L129 44 Z" fill="#ff354f" stroke="#ff9aa6"/><path d="M68 16 L70 28 M122 26 L127 38" fill="none" stroke="#ffffff" stroke-opacity=".65"/></g><g fill="#080f19" stroke="#a7bbc6" stroke-width="2"><rect x="36" y="43" width="23" height="18" rx="6"/><rect x="121" y="43" width="23" height="18" rx="6"/></g><g fill="#708793" stroke="#f5fcff" stroke-width="1.4"><circle cx="47.5" cy="52" r="5.8"/><circle cx="132.5" cy="52" r="5.8"/></g><path d="M51 47 L52 57 M43 52 L52 52 M128 47 L137 57 M128 53 L137 49" stroke="#dceef3" stroke-width="1.2"/><path d="M70 49 L109 49 L104 53 L75 53 Z" fill="#f2fcff" opacity=".82"/><path d="M73 39 L109 39" stroke="#061622" stroke-width="3"/><path d="M28 47 L18 44 L20 40 L34 41" fill="#dbe8ee"/><path d="M152 46 L164 43 L163 47 L153 51" fill="${t.color}"/></svg>`}
-function syncCarSelection(){document.querySelectorAll('.carPick').forEach((b,j)=>{b.classList.toggle('selected',j===selected);b.setAttribute('aria-pressed',String(j===selected))});const t=TYPES[selected];$('carName').textContent=t.name;$('selectedCarName').textContent=t.name;$('selectedCarDetails').textContent=`${t.desc} · Topsnelheid ${t.max} · Turbo ${t.boost}`;$('selectedCarArt').innerHTML=carSvg(t,'hero'+selected);$('startBtn').disabled=!selectedCarConfirmed;$('startBtn').textContent=selectedCarConfirmed?`START MET ${t.name.toUpperCase()} →`:'KIES EERST EEN AUTO';const status=$('setupStatus');if(status)status.innerHTML=`Gekozen: <strong>${t.name}</strong> · <strong>${$('blueCount').value}v${$('orangeCount').value}</strong> · 5 minuten`}
+function syncCarSelection(){
+ const i=clamp(Number(selected)||0,0,TYPES.length-1),t=TYPES[i];
+ // Update all important text and controls before drawing the optional SVG preview.
+ document.querySelectorAll('.carPick').forEach((b,j)=>{b.classList.toggle('selected',j===i);b.setAttribute('aria-pressed',String(j===i))});
+ $('carName').textContent=t.name;
+ $('selectedCarName').textContent=t.name;
+ $('selectedCarDetails').textContent=t.desc+' · Topsnelheid '+t.max+' · Turbo '+t.boost;
+ $('startBtn').disabled=!selectedCarConfirmed;
+ $('startBtn').textContent=selectedCarConfirmed?'START MET '+t.name.toUpperCase()+' →':'KIES EERST EEN AUTO';
+ const status=$('setupStatus');
+ if(status)status.textContent='Gekozen: '+t.name+' · '+$('blueCount').value+'v'+$('orangeCount').value+' · 5 minuten';
+ try{$('selectedCarArt').innerHTML=carSvg(t,'hero'+i)}catch(error){console.warn('Auto-preview kon niet worden getekend:',error);$('selectedCarArt').textContent=t.name}
+}
 function chooseCar(i){selected=clamp(i,0,TYPES.length-1);selectedCarConfirmed=true;boost=TYPES[selected].boost;syncCarSelection();updateHUD()}
 function changeCar(i){
  selected=(i+TYPES.length)%TYPES.length;
@@ -196,7 +208,7 @@ $('carGrid').innerHTML=TYPES.map((t,i)=>`<button type="button" class="carPick ${
 function leaveSplash(){const s=$('cinematicSplash');s.classList.add('hidden');setTimeout(()=>{if(s.classList.contains('hidden'))s.style.display='none'},260)}
 function showSetupFromSplash(){selectedCarConfirmed=false;leaveSplash();$('menu').style.display='flex';$('menu').classList.add('cinematic-setup');$('menu').querySelector('.subtitle').textContent='STAP 1 — VERPLICHT: klik op een auto om hem te kiezen. Stel daarna de teams in en druk op START.';syncCarSelection();updateHUD();setTimeout(()=>{$('carGrid').querySelector(`[data-car="${selected}"]`)?.focus({preventScroll:true})},280)}
 $('splashStart').addEventListener('click',()=>{$('blueCount').value='5';$('orangeCount').value='5';selected=0;boost=TYPES[selected].boost;showSetupFromSplash();say('Kies eerst je auto, controleer 5v5 en klik daarna op START MET …',4)});
-$('backSplashBtn').addEventListener('click',()=>{$('menu').style.display='none';$('menu').classList.remove('cinematic-setup');const s=$('cinematicSplash');s.style.display='block';requestAnimationFrame(()=>s.classList.remove('hidden'))});
+$('backSplashBtn').addEventListener('click',()=>{const menu=$('menu'),s=$('cinematicSplash');menu.style.display='none';menu.classList.remove('cinematic-setup');s.style.display='block';s.style.visibility='visible';s.style.opacity='1';s.style.pointerEvents='auto';s.removeAttribute('aria-hidden');s.classList.remove('hidden');});
 $('splashGarage').addEventListener('click',showSetupFromSplash);
 $('splashSettings').addEventListener('click',showSetupFromSplash);
 $('splashShop').addEventListener('click',()=>{returnToSplash=true;leaveSplash();openShop()});
@@ -662,7 +674,7 @@ try{initGL();const ro=new ResizeObserver(resize);ro.observe(canvas);resize();upd
  function openSetup(resetTeams){
   const splash=el('cinematicSplash'),menu=el('menu');
   // Make the transition happen first; optional car/HUD refresh must never block the start menu.
-  if(splash){splash.classList.add('hidden');splash.style.pointerEvents='none';splash.setAttribute('aria-hidden','true');splash.style.display='none'}
+  if(splash){splash.classList.add('hidden');splash.style.setProperty('pointer-events','none','important');splash.setAttribute('aria-hidden','true');splash.style.display='none'}
   if(menu){menu.classList.remove('hidden');menu.classList.add('cinematic-setup');menu.style.setProperty('display','flex','important');menu.style.setProperty('z-index','1000','important');menu.style.visibility='visible';menu.style.opacity='1';menu.style.pointerEvents='auto';menu.setAttribute('aria-label','Auto- en teamkeuze')}
   const sub=el('setupDirections');
   if(sub)sub.textContent='Kies je auto, stel de teams in en druk daarna op START MET …';
@@ -701,6 +713,15 @@ try{initGL();const ro=new ResizeObserver(resize);ro.observe(canvas);resize();upd
    else if(typeof window.__BROpenShop==='function')window.__BROpenShop();
    else{const modal=el('shopModal');if(modal){modal.style.display='flex';modal.style.zIndex='2000';const items=el('shopItems');if(items)items.textContent='Winkel geopend; herlaad de game als de producten ontbreken.'}}
   }catch(error){console.error('Shop click error:',error);const modal=el('shopModal');if(modal){modal.style.display='flex';modal.style.zIndex='2000'}const items=el('shopItems');if(items)items.textContent='Winkel is geopend, maar de inhoud kon niet worden geladen.'}
+ },true);
+ // Restore every splash property changed when entering the garage. The normal handler is kept too.
+ document.addEventListener('click',event=>{
+  const back=event.target instanceof Element?event.target.closest('#backSplashBtn'):null;
+  if(!back)return;
+  event.preventDefault();event.stopImmediatePropagation();
+  const menu=el('menu'),splash=el('cinematicSplash');
+  if(menu){menu.style.display='none';menu.classList.remove('cinematic-setup')}
+  if(splash){splash.style.display='block';splash.style.visibility='visible';splash.style.opacity='1';splash.style.setProperty('pointer-events','auto','important');splash.removeAttribute('aria-hidden');splash.classList.remove('hidden')}
  },true);
  // Recreate the car choices if the main script stopped before it populated the grid.
  const grid=el('carGrid');
