@@ -7,8 +7,8 @@
 :root{--cyan:#3ce6ff;--orange:#ff9637;--panel:rgba(4,17,29,.88);--line:rgba(85,220,255,.35)}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#06131f;color:#effaff;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 #app{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 10%,#1a465e,#06131f 72%)}
-#gl{position:absolute;inset:0;width:100%;height:100%;display:block;outline:none;z-index:0}
-#glFallback{position:absolute;inset:0;width:100%;height:100%;display:none;outline:none;z-index:1;pointer-events:none}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:none!important;outline:none;z-index:0}
+#glFallback{position:absolute;inset:0;width:100%;height:100%;display:block;outline:none;z-index:1;pointer-events:none}
 header{position:absolute;left:0;right:0;top:0;z-index:4;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:14px 18px;background:linear-gradient(180deg,rgba(2,10,18,.82),rgba(2,10,18,.12),transparent);pointer-events:none}
 .brand{font-size:clamp(22px,3vw,38px);font-weight:1000;letter-spacing:-1.8px;line-height:.95;font-style:italic;text-shadow:0 3px 18px #0008}.brand span{color:var(--cyan)}.tag{font-size:10px;letter-spacing:3px;color:#b6d4e3;margin-top:7px;font-weight:800}.studio{font-size:9px;letter-spacing:2px;color:#49e5ff;margin-top:5px;font-weight:950;text-transform:uppercase;text-shadow:0 0 12px #27dfff35}.menuStudio{margin-top:9px;margin-bottom:2px}
 .hud{display:flex;gap:7px}.stat{min-width:70px;padding:9px 12px;border-radius:12px;border:1px solid #36748b;background:rgba(2,16,28,.76);box-shadow:0 8px 25px #0003;text-align:center}.stat label{display:block;font-size:9px;letter-spacing:1.6px;color:#aac6d4;font-weight:900}.stat strong{font-size:20px;line-height:1.25}.blue{color:var(--cyan)}.orange{color:var(--orange)}.boostbar{height:5px;width:100%;background:#203849;border-radius:8px;margin-top:4px;overflow:hidden}.boostbar i{display:block;width:100%;height:100%;background:var(--cyan);box-shadow:0 0 12px var(--cyan)}
@@ -685,7 +685,32 @@ function loop(now){
  requestAnimationFrame(loop)
 }
 function resize(){const dpr=Math.min(window.devicePixelRatio||1,1.5);const w=Math.max(1,Math.floor(canvas.clientWidth*dpr)),h=Math.max(1,Math.floor(canvas.clientHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;if(gl)gl.viewport(0,0,w,h)}if(fallbackCanvas.style.display!=='none'){const fw=Math.max(1,Math.floor(fallbackCanvas.clientWidth*dpr)),fh=Math.max(1,Math.floor(fallbackCanvas.clientHeight*dpr));if(fallbackCanvas.width!==fw||fallbackCanvas.height!==fh){fallbackCanvas.width=fw;fallbackCanvas.height=fh}}}
-try{initGL();const ro=new ResizeObserver(resize);ro.observe(canvas);resize();updateCameraButton();updateHUD();last=performance.now();requestAnimationFrame(loop)}catch(e){console.warn('3D-renderer niet beschikbaar; 2D-fallback wordt gestart:',e.message);gl=null;fallbackCtx=fallbackCanvas.getContext('2d');if(fallbackCtx){$('fallback').style.display='none';fallbackCanvas.style.display='block';resize();updateCameraButton();updateHUD();say('Compatibiliteitsmodus actief: speelveld in 2D-perspectief.',6);last=performance.now();requestAnimationFrame(loop)}else{$('fallback').style.display='block';$('fallback').querySelector('p').textContent='De arena kon niet worden weergegeven. Probeer een browser met canvas-ondersteuning.'}}
+// Start directly in the reliable 2D arena. The former WebGL-first startup was
+// leaving a blank viewport on some browsers even though the HUD/game logic ran.
+try{
+ gl=null;
+ canvas.style.setProperty('display','none','important');
+ canvas.style.visibility='hidden';
+ fallbackCanvas.style.setProperty('display','block','important');
+ fallbackCanvas.style.visibility='visible';
+ fallbackCanvas.style.opacity='1';
+ fallbackCanvas.style.setProperty('z-index','1','important');
+ fallbackCtx=fallbackCanvas.getContext('2d');
+ if(!fallbackCtx)throw new Error('2D canvas context is unavailable');
+ $('fallback').style.display='none';
+ resize();
+ const ro=new ResizeObserver(()=>resize());ro.observe(fallbackCanvas);
+ window.addEventListener('resize',resize,{passive:true});
+ updateCameraButton();updateHUD();
+ say('Arena gestart in compatibiliteitsmodus.',4);
+ last=performance.now();
+ requestAnimationFrame(loop);
+}catch(e){
+ console.error('Battle Ramps kon de arena niet starten:',e);
+ $('fallback').style.display='block';
+ $('fallback').style.zIndex='2000';
+ $('fallback').querySelector('p').textContent='De arena kon niet worden weergegeven ('+(e.message||e)+'). Probeer deze pagina opnieuw te laden in Safari of Chrome.';
+}
 })();
 </script>
 <script id="battleRampsInputGuard">
