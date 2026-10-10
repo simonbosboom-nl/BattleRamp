@@ -128,6 +128,10 @@ const ball={x:0,z:0,y:1.15,vx:0,vz:0,vy:0,spin:0};
 let gl,prog,loc={},meshes={},staticMesh=null,worldTime=0,fallbackCtx=null,turfTile=null,turfPattern=null,returnToSplash=false;
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const V=(x=0,y=0,z=0)=>({x,y,z});
+// Expose core actions for the independent startup/input guard below.
+window.__BRStartGame=()=>startGame();
+window.__BRChooseCar=(i)=>chooseCar(i);
+window.__BRBuildRamp=()=>buildRamp();
 function say(s,hold=2.5){toast=s;msgHold=hold;$('topmsg').textContent=s}
 function updateHUD(){
 $('blueScore').textContent=blue;$('orangeScore').textContent=orange;$('time').textContent=Math.ceil(clock);$('rlBlueScore').textContent=blue;$('rlOrangeScore').textContent=orange;const secs=Math.max(0,Math.ceil(clock));$('rlTimer').textContent=Math.floor(secs/60)+':'+String(secs%60).padStart(2,'0');
@@ -164,9 +168,9 @@ $('splashGarage').addEventListener('click',showSetupFromSplash);
 $('splashSettings').addEventListener('click',showSetupFromSplash);
 $('splashShop').addEventListener('click',()=>{returnToSplash=true;leaveSplash();openShop()});
 $('splashExit').addEventListener('click',()=>{say('Je kunt Battle Ramps sluiten door dit tabblad te sluiten.',4);$('splashExit').style.background='rgba(255,150,55,.12)';$('splashExit').style.borderColor='rgba(255,150,55,.7)'});
-$('startBtn').addEventListener('click',startGame);$('blueCount').addEventListener('change',()=>{updateHUD();syncCarSelection()});$('orangeCount').addEventListener('change',()=>{updateHUD();syncCarSelection()});
+$('startBtn').onclick=()=>window.__BRStartGame();$('blueCount').addEventListener('change',()=>{updateHUD();syncCarSelection()});$('orangeCount').addEventListener('change',()=>{updateHUD();syncCarSelection()});
 $('helpBtn').addEventListener('click',()=>say('WASD/pijltjes rijden · Shift turbo · Spatie/F wapen (munitie nodig) · J springen · B schans (voorraad nodig) · Verzamel supply drops!',6));
-$('buildBtn').addEventListener('click',buildRamp);$('fireBtn').addEventListener('click',fireWeapon);
+$('buildBtn').onclick=()=>window.__BRBuildRamp();$('fireBtn').addEventListener('click',fireWeapon);
 $('cameraBtn').addEventListener('click',()=>{followCam=!followCam;updateCameraButton();say(followCam?'Camera: achter de auto':'Camera: cockpit / first-person')});updateCameraButton();
 $('pauseBtn').addEventListener('click',()=>{if(!playing)return;paused=!paused;$('pauseBtn').textContent=paused?'▶ Verder':'Ⅱ Pauze';say(paused?'Spel gepauzeerd':'Verder spelen')});
 $('shopBtn').addEventListener('click',openShop);$('menuShopBtn').addEventListener('click',openShop);$('closeShop').addEventListener('click',closeShop);$('backToGame').addEventListener('click',closeShop);$('shopItems').addEventListener('click',e=>{const b=e.target.closest('[data-shop]');if(!b)return;const it=SHOP_ITEMS.find(q=>q.id===b.dataset.shop);if(!it)return;if(ownedCosmetics.includes(it.id)){equippedCosmetic=it.id;saveProgress();say('Uitgerust: '+it.name);renderShop();return}if(wins<it.price){say('Je hebt '+it.price+' wins nodig voor '+it.name+'.');return}wins-=it.price;ownedCosmetics.push(it.id);equippedCosmetic=it.id;saveProgress();renderShop();say(it.name+' gekocht en uitgerust!')});
@@ -574,5 +578,51 @@ for(const a of particles){a.x+=a.vx*dt;a.y+=a.vy*dt;a.z+=a.vz*dt;a.vy-=7*dt;a.li
 function loop(now){const dt=Math.min(.033,Math.max(.001,(now-last)/1000||.016));last=now;try{update(dt);render()}catch(e){console.error(e);say('Er ging iets mis in de 3D-renderer. Probeer opnieuw te starten.',99)}requestAnimationFrame(loop)}
 function resize(){const dpr=Math.min(window.devicePixelRatio||1,1.5);const w=Math.max(1,Math.floor(canvas.clientWidth*dpr)),h=Math.max(1,Math.floor(canvas.clientHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;if(gl)gl.viewport(0,0,w,h)}}
 try{initGL();const ro=new ResizeObserver(resize);ro.observe(canvas);resize();updateCameraButton();updateHUD();last=performance.now();requestAnimationFrame(loop)}catch(e){console.warn('3D renderer not available; using 2D compatibility renderer:',e.message);fallbackCtx=canvas.getContext('2d');if(fallbackCtx){$('fallback').style.display='none';resize();updateCameraButton();updateHUD();say('Compatibiliteitsmodus actief: 2D-perspectief. Schakel WebGL/hardwareversnelling in voor de volledige 3D-weergave.',6);last=performance.now();requestAnimationFrame(loop)}else{$('fallback').style.display='block';$('fallback').querySelector('p').textContent='Deze browser kan geen 3D- of 2D-renderer starten.'}}
+})();
+</script>
+<script id="battleRampsInputGuard">
+(()=> {
+ const el=id=>document.getElementById(id);
+ function openSetup(resetTeams){
+  const splash=el('cinematicSplash'),menu=el('menu');
+  if(resetTeams){
+   const blue=el('blueCount'),orange=el('orangeCount');
+   if(blue)blue.value='5';
+   if(orange)orange.value='5';
+   if(typeof window.__BRChooseCar==='function')window.__BRChooseCar(0);
+  }
+  if(splash){splash.classList.add('hidden');splash.style.display='none';splash.style.pointerEvents='none';splash.setAttribute('aria-hidden','true')}
+  if(menu){menu.style.display='flex';menu.classList.add('cinematic-setup');menu.setAttribute('aria-label','Auto- en teamkeuze')}
+  const sub=el('setupDirections');
+  if(sub)sub.textContent='Kies je auto, stel de teams in en druk daarna op START MET …';
+ }
+ // Capture phase makes the visible splash button work even if the original handler failed to attach.
+ document.addEventListener('click',event=>{
+  const target=event.target instanceof Element?event.target.closest('#splashStart,#splashGarage,#splashSettings'):null;
+  if(!target)return;
+  event.preventDefault();
+  openSetup(target.id==='splashStart');
+ },true);
+ // Explicit fallbacks for the two buttons most important to playing the game.
+ const start=el('startBtn');
+ if(start&&typeof window.__BRStartGame==='function')start.onclick=()=>window.__BRStartGame();
+ const build=el('buildBtn');
+ if(build&&typeof window.__BRBuildRamp==='function')build.onclick=()=>window.__BRBuildRamp();
+ // Recreate the car choices if the main script stopped before it populated the grid.
+ const grid=el('carGrid');
+ if(grid&&!grid.querySelector('.carPick')){
+  const cars=[
+   ['Rally GT','Gebalanceerd · 110 HP'],
+   ['Neon Speedster','Supersnel · 78 HP'],
+   ['Battle Tank','Zwaar · 220 HP'],
+   ['Dune Buggy','Wendbaar · 88 HP'],
+   ['Hyper X','Snelle acceleratie · 96 HP']
+  ];
+  grid.innerHTML=cars.map((car,i)=>'<button type="button" class="carPick'+(i===0?' selected':'')+'" data-car="'+i+'"><b>'+car[0]+'</b><small>'+car[1]+'</small></button>').join('');
+  grid.addEventListener('click',event=>{
+   const card=event.target instanceof Element?event.target.closest('[data-car]'):null;
+   if(card&&typeof window.__BRChooseCar==='function')window.__BRChooseCar(Number(card.dataset.car));
+  });
+ }
 })();
 </script></body></html>
