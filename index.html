@@ -36,8 +36,13 @@ header{position:absolute;left:0;right:0;top:0;z-index:4;display:flex;justify-con
 @media(max-width:700px){header{padding:10px;align-items:flex-start}.brand{font-size:22px}.tag{font-size:8px;letter-spacing:1.6px}.stat{min-width:48px;padding:6px 7px}.stat label{font-size:7px;letter-spacing:.7px}.stat strong{font-size:16px}#topmsg{top:78px}#bottom{padding:12px;display:block}#instructions{max-width:100%;font-size:10px}#instructions .desktop{display:none}.actions{max-width:100%;justify-content:center;margin-top:7px}.actions button{padding:8px;font-size:11px}#touch{display:flex;bottom:128px}.carGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.carPick{min-height:70px}.menuCard{padding:18px}.subtitle{font-size:13px}}
 
 /* Cinematic Battle Ramps art-directed start screen */
-#cinematicSplash{position:absolute;inset:0;z-index:30;overflow:hidden;opacity:1;background:#020913;background-image:linear-gradient(90deg,rgba(2,7,14,.16),transparent 65%),url("assets/battle-ramps-stadium.webp?v=20261010fix");background-size:135% auto;background-position:left top;transition:opacity .24s ease;}
-#cinematicSplash:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(2,8,16,.6),transparent 22%,transparent 72%,rgba(2,8,16,.07));pointer-events:none}
+#cinematicSplash{position:absolute;inset:0;z-index:30;overflow:hidden;opacity:1;background:#020913;background-image:linear-gradient(90deg,rgba(2,7,14,.16),transparent 65%),url("assets/battle-ramps-stadium.webp?v=20261010fix");background-size:cover;background-position:center center;transition:opacity .24s ease;}
+#cinematicSplash:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(2,8,16,.68),rgba(2,8,16,.05) 43%,rgba(2,8,16,.08));pointer-events:none}
+#splashLogo{position:absolute;z-index:4;left:3.3%;top:4.5%;width:min(37vw,560px);pointer-events:none;transform:skew(-7deg);filter:drop-shadow(0 7px 6px #000b)}
+#splashLogo span{display:block;font-family:Impact,Haettenschweiler,"Arial Black",system-ui,sans-serif;font-weight:1000;line-height:.79;text-transform:uppercase;letter-spacing:-.065em;-webkit-text-stroke:1px rgba(10,17,27,.7)}
+#splashLogo .splashWordBattle{font-size:clamp(42px,6.5vw,100px);color:#f4f3ec;text-shadow:3px 5px 0 #111c2b,6px 9px 0 #0009}
+#splashLogo .splashWordRamps{font-size:clamp(48px,7.4vw,114px);color:#ff9f08;text-shadow:3px 5px 0 #7b310a,6px 9px 0 #000a;margin-left:7%}
+@media(max-width:700px){#splashLogo{left:3%;top:3%;width:53vw}#splashLogo .splashWordBattle{font-size:clamp(34px,9vw,58px)}#splashLogo .splashWordRamps{font-size:clamp(38px,10vw,64px)}}
 #cinematicSplash.hidden{opacity:0;pointer-events:none}
 .splash-hotspot{position:absolute;z-index:5;display:flex;align-items:center;justify-content:flex-start;gap:12px;padding:0 0 0 clamp(12px,1.4vw,24px);border:1px solid rgba(196,229,244,.58);border-radius:7px;color:#f4faff;background:linear-gradient(100deg,rgba(3,13,24,.97),rgba(6,24,37,.94));box-shadow:0 5px 17px #0009,inset 0 1px 0 #ffffff18;font:1000 clamp(12px,1.1vw,17px)/1 system-ui,sans-serif;letter-spacing:1.2px;text-transform:uppercase;text-shadow:0 2px 5px #000;cursor:pointer;outline-offset:3px;clip-path:polygon(4% 0,100% 0,94% 100%,0 100%);transition:filter .14s,transform .14s,box-shadow .14s}
 .splash-hotspot:hover,.splash-hotspot:focus-visible{filter:brightness(1.14);box-shadow:0 0 0 2px #ffdf88,0 0 22px #ffb92866;outline:2px solid #ffe59a}
@@ -56,7 +61,7 @@ header{position:absolute;left:0;right:0;top:0;z-index:4;display:flex;justify-con
 #menu.cinematic-setup{z-index:100!important;background:rgba(0,7,15,.64);backdrop-filter:blur(7px)}
 #menu.cinematic-setup .menuCard{border-color:#73e9ff;background:linear-gradient(145deg,rgba(5,26,42,.95),rgba(3,10,20,.96));box-shadow:0 0 0 1px #47dfff26,0 30px 100px #000d}
 #menu.cinematic-setup .menuTitle{text-shadow:0 4px 18px #000}
-@media(max-width:700px){#cinematicSplash{background-size:175% auto;background-position:left top}#splashStart{left:2%;top:49%;width:39%;height:7.2%}#splashGarage{left:2%;top:63.7%;width:39%;height:7%}#splashShop{left:2%;top:56.5%;width:39%;height:7%}#splashSettings{left:2%;top:70.9%;width:39%;height:7%}#splashExit{left:2%;top:78.1%;width:39%;height:7.2%}#splashStudio{left:50%;top:auto;bottom:6%;width:min(390px,92vw);max-width:92vw;padding:6px 9px;letter-spacing:1px}#splashStudio strong{font-size:12px;letter-spacing:1.3px}#splashFooter{font-size:8px;letter-spacing:.4px;bottom:5px}
+@media(max-width:700px){#cinematicSplash{background-size:cover;background-position:center center}#splashStart{left:2%;top:49%;width:39%;height:7.2%}#splashGarage{left:2%;top:63.7%;width:39%;height:7%}#splashShop{left:2%;top:56.5%;width:39%;height:7%}#splashSettings{left:2%;top:70.9%;width:39%;height:7%}#splashExit{left:2%;top:78.1%;width:39%;height:7.2%}#splashStudio{left:50%;top:auto;bottom:6%;width:min(390px,92vw);max-width:92vw;padding:6px 9px;letter-spacing:1px}#splashStudio strong{font-size:12px;letter-spacing:1.3px}#splashFooter{font-size:8px;letter-spacing:.4px;bottom:5px}
 #splashStart{min-height:45px}#splashGarage,#splashShop,#splashSettings,#splashExit{min-height:38px}}
 
 /* Battle Ramps setup clarity upgrade */
@@ -82,7 +87,7 @@ header{position:absolute;left:0;right:0;top:0;z-index:4;display:flex;justify-con
 </style></head>
 <body><div id="app">
 <canvas id="gl" aria-label="Battle Ramps 3D arena"></canvas>
-<div id="cinematicSplash" role="navigation" aria-label="Battle Ramps hoofdmenu">
+<div id="cinematicSplash" role="navigation" aria-label="Battle Ramps hoofdmenu">\n<div id="splashLogo" aria-hidden="true"><span class="splashWordBattle">BATTLE</span><span class="splashWordRamps">RAMPS</span></div>
 <div id="splashStudio" aria-label="Geproduceerd door Homework Ninja Studios">PRODUCED BY<strong>HOMEWORK NINJA STUDIOS</strong></div>
 <button type="button" class="splash-hotspot" id="splashStart" onclick="window.__BROpenSetup && window.__BROpenSetup(true)" aria-label="Speel: begin een wedstrijd" title="Begin een wedstrijd">▶ &nbsp; SPEEL</button>
 <button type="button" class="splash-hotspot" id="splashGarage" onclick="window.__BROpenSetup && window.__BROpenSetup(false)" aria-label="Garage en auto kiezen" title="Kies je auto">▣ &nbsp; GARAGE</button>
