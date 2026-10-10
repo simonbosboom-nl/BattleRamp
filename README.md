@@ -1,17 +1,15 @@
 # Battle Ramps
 
-A browser-playable prototype. GitHub Actions reconstructs the compressed HTML bundle and deploys it to GitHub Pages.
+Browser-playable prototype published with GitHub Pages.
 
 ## Play
 
-After the **Deploy Battle Ramps Pages** workflow completes successfully, open:
+Open https://simonbosboom-nl.github.io/BattleRamp/
 
-https://simonbosboom-nl.github.io/BattleRamp/
-
-No manual download is needed. Open the link in Safari or Chrome. For the best live 3D renderer, use a browser with WebGL enabled.
+The start screen has a two-step setup: choose **Start wedstrijd**, select a car, review team sizes, then press the button showing **START MET [AUTO]** to start the match. No manual downloading is needed.
 
 ## Deployment
 
-Workflow: `.github/workflows/pages.yml`
+GitHub Actions copies `index.html`, reconstructs the optimized stadium background from `site-bundle/stadium-*.b64`, and deploys both to Pages. Workflow: `.github/workflows/pages.yml`.
 
-The build reassembles the `bundle/part-*.b64` source fragments into `_site/index.html`, verifies key elements, and deploys the result using GitHub Pages.
+This remains a browser prototype, not a compiled Unreal Engine game. WebGL support affects the 3D renderer; the stadium menu art is a static background illustration.
