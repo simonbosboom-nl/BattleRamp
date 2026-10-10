@@ -40,6 +40,22 @@ jobs:
           grep -q 'battle-ramps-stadium.webp' _site/index.html
           file _site/assets/battle-ramps-stadium.webp
           echo "Built HTML ($(wc -c < _site/index.html) bytes) and stadium asset ($(wc -c < _site/assets/battle-ramps-stadium.webp) bytes)"
+      - name: Install Playwright browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Smoke test 3D startup and arena rendering
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --directory _site >/tmp/battleramps-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 1
+          done
+          node .github/scripts/webgl-smoke.cjs
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
