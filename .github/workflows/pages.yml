@@ -28,7 +28,7 @@ jobs:
           set -euo pipefail
           mkdir -p _site/assets
           cp index.html _site/index.html
-          tr -d '\\n' < site-bundle/stadium-clean.b64 | base64 --decode > _site/assets/battle-ramps-stadium.webp
+          base64 --decode < site-bundle/stadium-clean.b64 > _site/assets/battle-ramps-stadium.webp
           test -s _site/index.html
           test -s _site/assets/battle-ramps-stadium.webp
           grep -q 'BATTLE RAMPS' _site/index.html
