@@ -93,7 +93,6 @@ kbd{background:#112d40;border:1px solid #456b7e;border-bottom-width:2px;border-r
 </style></head>
 <body><div id="app">
 <canvas id="gl" aria-label="Battle Ramps 3D arena"></canvas>
-<canvas id="glFallback" aria-label="Battle Ramps arena in compatibility mode"></canvas>
 <div id="cinematicSplash" role="navigation" aria-label="Battle Ramps hoofdmenu">\n<div id="splashLogo" aria-hidden="true"><span class="splashWordBattle">BATTLE</span><span class="splashWordRamps">RAMPS</span></div>
 <div id="splashStudio" aria-label="Geproduceerd door Homework Ninja Studios">PRODUCED BY<strong>HOMEWORK NINJA STUDIOS</strong></div>
 <button type="button" class="splash-hotspot" id="splashStart" aria-label="Speel: begin een wedstrijd" title="Begin een wedstrijd">▶ &nbsp; SPEEL</button>
@@ -122,7 +121,6 @@ kbd{background:#112d40;border:1px solid #456b7e;border-bottom-width:2px;border-r
 (()=>{
 'use strict';
 const canvas=document.getElementById('gl');
-const fallbackCanvas=document.getElementById('glFallback');
 const $=id=>document.getElementById(id);
 const TYPES=[
 {name:'Rally GT',color:'#20cfff',max:25,acc:17,turn:2.35,boost:100,weight:1,style:0,hp:110,desc:'Gebalanceerd · 110 HP'},
@@ -138,7 +136,7 @@ const keys=Object.create(null),ramps=[],shots=[],particles=[],blueMates=[],orang
 const player={x:-42,z:0,y:0,vy:0,yaw:Math.PI/2,speed:0,ground:true,cool:0,jumpCool:0,team:'blue',index:0,weaponCooldown:0,hp:110,maxHp:110,ammo:12,rampStock:2,respawnTimer:0};
 const bot={x:42,z:0,y:0,vy:0,yaw:-Math.PI/2,speed:0,cool:0,team:'orange',index:0,count:3,style:2,weaponCooldown:1.4,hp:220,maxHp:220,ammo:8,rampStock:1,respawnTimer:0};
 const ball={x:0,z:0,y:1.15,vx:0,vz:0,vy:0,spin:0};
-let gl,prog,loc={},meshes={},staticMesh=null,worldTime=0,fallbackCtx=null,turfTile=null,turfPattern=null,returnToSplash=false,selectedCarConfirmed=false,rendererVerified=false,rendererFallbackActive=false;
+let gl,prog,loc={},meshes={},staticMesh=null,worldTime=0,returnToSplash=false,selectedCarConfirmed=false,rendererVerified=false;
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const V=(x=0,y=0,z=0)=>({x,y,z});
 // Expose core actions for the independent startup/input guard below.
@@ -547,7 +545,7 @@ function loop(now){
  }
  requestAnimationFrame(loop)
 }
-function resize(){const dpr=Math.min(window.devicePixelRatio||1,1.5);const w=Math.max(1,Math.floor(canvas.clientWidth*dpr)),h=Math.max(1,Math.floor(canvas.clientHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;if(gl)gl.viewport(0,0,w,h)}if(fallbackCanvas.style.display!=='none'){const fw=Math.max(1,Math.floor(fallbackCanvas.clientWidth*dpr)),fh=Math.max(1,Math.floor(fallbackCanvas.clientHeight*dpr));if(fallbackCanvas.width!==fw||fallbackCanvas.height!==fh){fallbackCanvas.width=fw;fallbackCanvas.height=fh}}}
+function resize(){const dpr=Math.min(window.devicePixelRatio||1,1.5);const w=Math.max(1,Math.floor(canvas.clientWidth*dpr)),h=Math.max(1,Math.floor(canvas.clientHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;if(gl)gl.viewport(0,0,w,h)}}
 // Start uitsluitend de echte 3D-WebGL-renderer. Geen 2D-terugvalweergave.
 try{
  canvas.style.display='block';
