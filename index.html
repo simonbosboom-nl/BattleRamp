@@ -164,7 +164,7 @@ $('buildBtn').addEventListener('click',buildRamp);$('fireBtn').addEventListener(
 $('cameraBtn').addEventListener('click',()=>{followCam=!followCam;updateCameraButton();say(followCam?'Camera: achter de auto':'Camera: cockpit / first-person')});updateCameraButton();
 $('pauseBtn').addEventListener('click',()=>{if(!playing)return;paused=!paused;$('pauseBtn').textContent=paused?'▶ Verder':'Ⅱ Pauze';say(paused?'Spel gepauzeerd':'Verder spelen')});
 $('shopBtn').addEventListener('click',openShop);$('menuShopBtn').addEventListener('click',openShop);$('closeShop').addEventListener('click',closeShop);$('backToGame').addEventListener('click',closeShop);$('shopItems').addEventListener('click',e=>{const b=e.target.closest('[data-shop]');if(!b)return;const it=SHOP_ITEMS.find(q=>q.id===b.dataset.shop);if(!it)return;if(ownedCosmetics.includes(it.id)){equippedCosmetic=it.id;saveProgress();say('Uitgerust: '+it.name);renderShop();return}if(wins<it.price){say('Je hebt '+it.price+' wins nodig voor '+it.name+'.');return}wins-=it.price;ownedCosmetics.push(it.id);equippedCosmetic=it.id;saveProgress();renderShop();say(it.name+' gekocht en uitgerust!')});
-function updateCameraButton(){$('cameraBtn').textContent=followCam?'Camera: achter [V]':'Camera: Cockpit [V]'}
+function updateCameraButton(){$('cameraBtn').textContent=!gl?(followCam?'Camera: achter [V]':'Camera: overzicht [V]'):(followCam?'Camera: achter [V]':'Camera: Cockpit [V]')}
 window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(e.repeat)return;if(k==='b')buildRamp();if(k===' '||k==='f')fireWeapon();if(k==='j')jump();if(k==='v'){followCam=!followCam;updateCameraButton()}if(k==='escape'&&playing){paused=!paused;$('pauseBtn').textContent=paused?'▶ Verder':'Ⅱ Pauze'}});
 window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});window.addEventListener('blur',()=>{for(const k in keys)keys[k]=false});
 document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;const on=e=>{e.preventDefault();keys[k]=true};const off=e=>{e.preventDefault();keys[k]=false};b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('pointerleave',off)});
@@ -349,8 +349,15 @@ function renderFallback2D(){
  const fw=W*.92,fh=H*.61,fx=(W-fw)/2,fy=H*.18,cx=W/2,cy=H*.50;
  // Compatibility renderer now uses a behind-the-car perspective: the near goal is wide and low,
  // the far end recedes toward the stadium horizon, and cars scale with depth.
- const depthK=x=>.56+.44*clamp((70-x)/140,0,1);
- const P=(x,z,y=0)=>({x:cx+z*(W*.45/42)*depthK(x),y:H*.185+((70-x)/140)*(H*.595)-y*H*.018*depthK(x)});
+ const overviewDepth=x=>.56+.44*clamp((70-x)/140,0,1);
+ // Compatibility renderer: follow the player's heading; V returns to full-field overview.
+ const fwd=forward(player.yaw);
+ const relative=(x,z)=>({along:(x-player.x)*fwd.x+(z-player.z)*fwd.z,side:-(x-player.x)*fwd.z+(z-player.z)*fwd.x});
+ const depthOf=(x,z)=>followCam ? 0.56+0.44*clamp((70-relative(x,z).along)/140,0,1) : overviewDepth(x);
+ const P=(x,z,y=0)=>{
+  if(followCam){const r=relative(x,z),d=0.56+0.44*clamp((70-r.along)/140,0,1);return {x:cx+r.side*(W*.45/42)*d,y:H*.66-r.along*(H*.595/140)-y*H*.018*d}}
+  const d=overviewDepth(x);return {x:cx+z*(W*.45/42)*d,y:H*.185+((70-x)/140)*(H*.595)-y*H*.018*d};
+ };
  const WQ=(pts)=>{c.beginPath();pts.forEach((q,i)=>{const p=P(q[0],q[1],q[2]||0);if(i===0)c.moveTo(p.x,p.y);else c.lineTo(p.x,p.y)});c.closePath()};
  const WLine=(pts)=>{c.beginPath();pts.forEach((q,i)=>{const p=P(q[0],q[1],q[2]||0);if(i===0)c.moveTo(p.x,p.y);else c.lineTo(p.x,p.y)})};
  const WRect=(x1,x2,z1,z2)=>[[x1,z1],[x2,z1],[x2,z2],[x1,z2]];
@@ -387,7 +394,7 @@ function renderFallback2D(){
   if(car.respawnTimer>0)return;
   const q=dot(car.x,car.z,car.y),style=TYPES[car.style===undefined?(enemy?2:selected):car.style]||TYPES[0];
   const color=team==='blue'?(enemy?'#4dbdff':teamType(car,'blue').color):teamType(car,'orange').color;
-  const depth=depthK(car.x),L=clamp(fw*.034*depth,20,43),B=clamp(fh*.061*depth,13,29),bodyColor=color;
+  const depth=depthOf(car.x,car.z),L=clamp(fw*.034*depth,20,43),B=clamp(fh*.061*depth,13,29),bodyColor=color;
   c.save();c.translate(q.x,q.y);
   // Soft contact shadow and a subtle bloom from the arena lighting.
   c.save();c.shadowColor='#000c';c.shadowBlur=9;c.fillStyle='rgba(0,7,12,.64)';c.beginPath();c.ellipse(2,L*.10,B*.66,L*.58,-.10,0,Math.PI*2);c.fill();c.restore();
@@ -443,7 +450,7 @@ function renderFallback2D(){
  function shadeHex(hex,factor){const n=parseInt(hex.replace('#',''),16);const r=Math.max(0,Math.min(255,Math.round((n>>16&255)*factor))),g=Math.max(0,Math.min(255,Math.round((n>>8&255)*factor))),b=Math.max(0,Math.min(255,Math.round((n&255)*factor)));return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('')}
  drawCar2D(player,'blue',false);for(const a of blueMates)drawCar2D(a,'blue',false);for(const a of orangeBots)drawCar2D(a,'orange',true);
  // Ball with floating shadow and animated dark panels.
- {const sh=dot(ball.x,ball.z,0),q=dot(ball.x,ball.z,ball.y),ballScale=depthK(ball.x);const br=clamp(W*.016*ballScale,10,22);c.save();c.shadowColor='#001722';c.shadowBlur=9;c.fillStyle='rgba(0,9,18,.65)';c.beginPath();c.ellipse(sh.x,sh.y+4,br*1.35,br*.53,0,0,Math.PI*2);c.fill();c.restore();const g=c.createRadialGradient(q.x-br*.42,q.y-br*.5,1,q.x,q.y,br);g.addColorStop(0,'#ffffff');g.addColorStop(.36,'#e7f5fa');g.addColorStop(.72,'#8ca4b2');g.addColorStop(.91,'#263d4d');g.addColorStop(1,'#07101a');c.save();c.shadowColor='#54eaff';c.shadowBlur=12;c.fillStyle=g;c.beginPath();c.arc(q.x,q.y,br,0,Math.PI*2);c.fill();c.restore();c.strokeStyle='#203746';c.lineWidth=1.4;c.stroke();c.save();c.beginPath();c.arc(q.x,q.y,br*.91,0,Math.PI*2);c.clip();c.fillStyle='#273d4d';for(let i=0;i<6;i++){const a=worldTime*.55+i*Math.PI/3;const px=q.x+Math.cos(a)*br*.46,py=q.y+Math.sin(a)*br*.46;c.beginPath();for(let k=0;k<5;k++){const aa=a+k*Math.PI*2/5;c.lineTo(px+Math.cos(aa)*br*.17,py+Math.sin(aa)*br*.17)}c.closePath();c.fill()}c.strokeStyle='#7895a9';c.globalAlpha=.75;c.lineWidth=.8;c.beginPath();c.ellipse(q.x-br*.15,q.y-br*.2,br*.47,br*.26,-.55,Math.PI,Math.PI*2);c.stroke();c.restore();c.save();c.shadowColor='#4fe9ff';c.shadowBlur=11;c.fillStyle='#aaf6ff';for(let i=0;i<3;i++){const a=worldTime*.9+i*Math.PI*2/3;c.beginPath();c.arc(q.x+Math.cos(a)*br*.72,q.y+Math.sin(a)*br*.72,Math.max(1,br*.055),0,Math.PI*2);c.fill()}c.restore()}
+ {const sh=dot(ball.x,ball.z,0),q=dot(ball.x,ball.z,ball.y),ballScale=depthOf(ball.x,ball.z);const br=clamp(W*.016*ballScale,10,22);c.save();c.shadowColor='#001722';c.shadowBlur=9;c.fillStyle='rgba(0,9,18,.65)';c.beginPath();c.ellipse(sh.x,sh.y+4,br*1.35,br*.53,0,0,Math.PI*2);c.fill();c.restore();const g=c.createRadialGradient(q.x-br*.42,q.y-br*.5,1,q.x,q.y,br);g.addColorStop(0,'#ffffff');g.addColorStop(.36,'#e7f5fa');g.addColorStop(.72,'#8ca4b2');g.addColorStop(.91,'#263d4d');g.addColorStop(1,'#07101a');c.save();c.shadowColor='#54eaff';c.shadowBlur=12;c.fillStyle=g;c.beginPath();c.arc(q.x,q.y,br,0,Math.PI*2);c.fill();c.restore();c.strokeStyle='#203746';c.lineWidth=1.4;c.stroke();c.save();c.beginPath();c.arc(q.x,q.y,br*.91,0,Math.PI*2);c.clip();c.fillStyle='#273d4d';for(let i=0;i<6;i++){const a=worldTime*.55+i*Math.PI/3;const px=q.x+Math.cos(a)*br*.46,py=q.y+Math.sin(a)*br*.46;c.beginPath();for(let k=0;k<5;k++){const aa=a+k*Math.PI*2/5;c.lineTo(px+Math.cos(aa)*br*.17,py+Math.sin(aa)*br*.17)}c.closePath();c.fill()}c.strokeStyle='#7895a9';c.globalAlpha=.75;c.lineWidth=.8;c.beginPath();c.ellipse(q.x-br*.15,q.y-br*.2,br*.47,br*.26,-.55,Math.PI,Math.PI*2);c.stroke();c.restore();c.save();c.shadowColor='#4fe9ff';c.shadowBlur=11;c.fillStyle='#aaf6ff';for(let i=0;i<3;i++){const a=worldTime*.9+i*Math.PI*2/3;c.beginPath();c.arc(q.x+Math.cos(a)*br*.72,q.y+Math.sin(a)*br*.72,Math.max(1,br*.055),0,Math.PI*2);c.fill()}c.restore()}
  // A discreet compatibility tag distinguishes this renderer from the full 3D mode.
  c.fillStyle='#d9faff';c.font='700 10px system-ui';c.textAlign='left';c.fillText('BATTLE RAMPS  ·  LIVE ARENA',Math.max(12,fx),Math.min(H-118,fy+fh+22));
 }
