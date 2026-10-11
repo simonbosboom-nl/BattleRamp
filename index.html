@@ -360,36 +360,86 @@ function localPosition(car,lx,ly,lz){const c=Math.cos(car.yaw),s=Math.sin(car.ya
 function drawLocal(car,lx,ly,lz,sx,sy,sz,color,em,view,proj,eye,mesh='cube',rz=0,surface=0){const q=localPosition(car,lx,ly,lz);drawMesh(meshes[mesh],model(q.x,q.y,q.z,car.yaw,sx,sy,sz,rz),color,em,view,proj,eye,surface)}
 function drawCar(car,type,view,proj,eye,enemy=false){
  const c=type.color,style=type.style;
- // Sculpted, tapered car shell rather than a large rectangular block.
- drawMesh(meshes.body,model(car.x,car.y+.63,car.z,car.yaw,2.48,1.12,4.05),c,.075,view,proj,eye,2);
- // Long bonnet inserts and reinforced front/rear bumpers.
- drawLocal(car,0,.675,.78,1.25,.035,1.20,style===2?'#f7ad6c':c,.12,view,proj,eye);
- drawLocal(car,0,.46,1.87,1.98,.23,.22,'#111d28',.01,view,proj,eye);
- drawLocal(car,0,.49,-1.88,1.90,.24,.22,'#121d27',0,view,proj,eye);
- // Cockpit glass and roof, with a different silhouette for each body type.
- if(style===2){drawLocal(car,0,1.05,-.03,1.78,.54,1.58,'#55626b',.02,view,proj,eye);drawLocal(car,0,1.34,-.04,1.02,.12,.77,'#263747',0,view,proj,eye)}
- else {drawLocal(car,0,.94,-.10,1.43,.40,1.40,style===3?'#355366':'#142839',.06,view,proj,eye);drawLocal(car,0,1.08,.00,1.18,.27,.83,style===0?'#73d9f0':style===1?'#f7a5e9':style===4?'#ffeaa2':'#b9e9c9',.18,view,proj,eye);drawLocal(car,0,.81,-1.22,1.62,.10,.35,c,.10,view,proj,eye)}
- // Side skirts, headlights, taillights, chunky tyres, metallic hubs.
+ // Five deliberately different silhouettes: rally coupe, low wedge, heavy tank, open buggy, long-nose hypercar.
+ const dims=[
+  {w:2.42,h:1.02,l:4.05,wheel:1.02,wheelZ:1.20},
+  {w:2.12,h:.80,l:4.42,wheel:.94,wheelZ:1.34},
+  {w:2.92,h:1.55,l:3.72,wheel:1.42,wheelZ:1.08},
+  {w:2.34,h:.92,l:3.58,wheel:1.05,wheelZ:1.02},
+  {w:2.30,h:.92,l:4.72,wheel:.99,wheelZ:1.43}
+ ][style]||{w:2.42,h:1.02,l:4.05,wheel:1.02,wheelZ:1.20};
+ const w=dims.w,h=dims.h,l=dims.l,wh=dims.wheel,wz=dims.wheelZ;
+ drawMesh(meshes.body,model(car.x,car.y+.55+h*.13,car.z,car.yaw,w,h,l),c,.10,view,proj,eye,2);
+ // Distinct bonnets, bumpers and cabin proportions.
+ drawLocal(car,0,.55+h*.13,.62,style===2?1.72:style===4?1.32:1.18,.055,style===1?1.78:style===4?1.62:1.12,style===2?'#d77a2e':c,.25,view,proj,eye);
+ drawLocal(car,0,.38,style===1?2.04:1.84,w*.83,.20,style===2?.30:.22,'#101722',.02,view,proj,eye);
+ drawLocal(car,0,.40,-l*.47,w*.81,.22,.22,'#101722',.02,view,proj,eye);
+ if(style===2){
+  // Heavy armored cabin with a broad windscreen and roof plates.
+  drawLocal(car,0,1.20,-.05,2.12,.73,1.70,'#485b68',.02,view,proj,eye);
+  drawLocal(car,0,1.60,-.05,1.54,.12,1.20,'#243848',.03,view,proj,eye);
+  drawLocal(car,0,1.12,.94,1.72,.32,.70,'#9b552b',.12,view,proj,eye);
+  for(const side of [-1,1])drawLocal(car,side*1.12,1.0,-.05,.14,.78,1.68,'#d0dbe1',.10,view,proj,eye);
+ }else if(style===3){
+  // Open-frame dune buggy with a visible roll cage.
+  drawLocal(car,0,.84,-.10,1.12,.28,1.08,'#183342',.08,view,proj,eye);
+  for(const side of [-1,1]){
+   drawLocal(car,side*.62,1.25,-.12,.085,.94,.085,'#d8edf4',.08,view,proj,eye);
+   drawLocal(car,side*.62,1.25,.64,.085,.94,.085,'#d8edf4',-.08,view,proj,eye);
+   drawLocal(car,side*.62,1.25,-.86,.085,.94,.085,'#d8edf4',.08,view,proj,eye);
+   drawLocal(car,side*.62,1.68,-.12,.10,.10,1.60,'#d8edf4',0,view,proj,eye);
+  }
+  drawLocal(car,0,.99,-.55,.96,.16,.60,'#b9e9c9',.12,view,proj,eye);
+ }else if(style===1){
+  // Low, pointed street racer with a narrow canopy and large rear wing.
+  drawLocal(car,0,.80,-.15,1.16,.29,1.62,'#172536',.10,view,proj,eye);
+  drawLocal(car,0,.92,-.02,.96,.20,1.05,'#f7a5e9',.32,view,proj,eye);
+  for(const side of [-1,1])drawLocal(car,side*.70,.83,-1.63,.10,.40,.12,'#263445',.05,view,proj,eye);
+  drawLocal(car,0,1.08,-1.72,2.05,.12,.38,c,.35,view,proj,eye);
+ }else if(style===4){
+  // Hypercar: stretched hood, gold canopy and split rear aero.
+  drawLocal(car,0,.81,.15,1.38,.20,1.95,'#142536',.12,view,proj,eye);
+  drawLocal(car,0,.99,-.38,1.04,.23,1.20,'#ffeaa2',.25,view,proj,eye);
+  drawLocal(car,0,1.08,-1.86,1.85,.11,.34,c,.24,view,proj,eye);
+  for(const side of [-1,1])drawLocal(car,side*.78,.86,-1.64,.12,.22,.12,'#253444',.06,view,proj,eye);
+ }else{
+  // Rally coupe with a compact cabin and rear deck.
+  drawLocal(car,0,.91,-.05,1.40,.38,1.38,'#142839',.08,view,proj,eye);
+  drawLocal(car,0,1.05,.02,1.12,.22,.82,'#73d9f0',.22,view,proj,eye);
+  drawLocal(car,0,.81,-1.18,1.55,.10,.36,c,.12,view,proj,eye);
+  drawLocal(car,0,1.03,-1.65,1.60,.13,.30,c,.18,view,proj,eye);
+ }
+ // Wheels, alloy hubs, side skirts and lighting are scaled per chassis.
  for(const side of [-1,1]){
-  drawLocal(car,side*.98,.51,.10,.13,.20,1.85,style===2?'#bac5cc':'#d1dfe6',.05,view,proj,eye);
-  drawLocal(car,side*.82,.68,1.70,.24,.13,.12,'#efffff',1.3,view,proj,eye);
-  drawLocal(car,side*.82,.64,-1.72,.24,.13,.12,'#ff4e52',.7,view,proj,eye);
-  for(const z of [-1.15,1.12]){
-   const q=localPosition(car,side*(style===2?1.23:1.04),.37,z);
-   drawMesh(meshes.wheel,model(q.x,q.y,q.z,car.yaw,.48,.46,.40,Math.PI/2),'#10151c',0,view,proj,eye,3);
-   const hub=localPosition(car,side*(style===2?1.48:1.28),.37,z);
-   drawMesh(meshes.sphere,model(hub.x,hub.y,hub.z,car.yaw,.20,.20,.20),'#b6cbd6',.16,view,proj,eye,4);
-   drawMesh(meshes.sphere,model(hub.x+side*.025,hub.y,hub.z,car.yaw,.085,.085,.085),'#526c7c',.06,view,proj,eye,4);
+  drawLocal(car,side*(w*.40),.48,.08,.12,.18,l*.68,style===2?'#d0dbe1':'#8399a9',.10,view,proj,eye);
+  drawLocal(car,side*(w*.34),.66,l*.39,.23,.12,.12,'#f7ffff',1.55,view,proj,eye);
+  drawLocal(car,side*(w*.34),.61,-l*.39,.25,.12,.12,'#ff405b',.85,view,proj,eye);
+  for(const z of [-wz,wz]){
+   const q=localPosition(car,side*wh,.35,z);
+   const radius=style===2?.60:style===3?.43:style===1?.38:.47;
+   drawMesh(meshes.wheel,model(q.x,q.y,q.z,car.yaw,radius,radius,style===2?.48:.38,Math.PI/2),'#0b1018',0,view,proj,eye,3);
+   const hub=localPosition(car,side*(wh+.06),.35,z);
+   drawMesh(meshes.sphere,model(hub.x,hub.y,hub.z,car.yaw,radius*.48,radius*.48,radius*.48),'#b9d8e9',.25,view,proj,eye,4);
+   drawMesh(meshes.sphere,model(hub.x+side*.025,hub.y,hub.z,car.yaw,radius*.20,radius*.20,radius*.20),'#3b566c',.08,view,proj,eye,4);
   }
  }
- // Rear spoiler on sportier cars; roll cage for the buggy.
- if(style===3){drawLocal(car,-.67,1.37,-.10,.10,.73,1.75,'#bbd8e4',.02,view,proj,eye);drawLocal(car,.67,1.37,-.10,.10,.73,1.75,'#bbd8e4',.02,view,proj,eye)}
- else if(style!==2){drawLocal(car,-.60,.91,-1.64,.10,.32,.09,'#172a38',0,view,proj,eye);drawLocal(car,.60,.91,-1.64,.10,.32,.09,'#172a38',0,view,proj,eye);drawLocal(car,0,1.08,-1.70,1.65,.13,.36,style===1?'#f247d4':c,.16,view,proj,eye)}
- drawLocal(car,0,1.04,.63,.34,.16,.42,'#152a39',.05,view,proj,eye);
- drawLocal(car,0,1.02,1.00,.19,.12,.28,enemy?'#ffb26b':'#82f4ff',1.0,view,proj,eye);
- if(!enemy){for(const side of [-1,1]){const q=localPosition(car,side*.65,.69,1.83);drawMesh(meshes.sphere,model(q.x,q.y,q.z,0,.15,.09,.08),'#f4ffff',1.7,view,proj,eye)}if(car===player){if(equippedCosmetic==='goldspoiler'){drawLocal(car,-.60,.91,-1.64,.10,.32,.09,'#ffd85a',.15,view,proj,eye);drawLocal(car,.60,.91,-1.64,.10,.32,.09,'#ffd85a',.15,view,proj,eye);drawLocal(car,0,1.08,-1.70,1.65,.16,.36,'#ffd85a',.3,view,proj,eye)}if(equippedCosmetic==='racingstripes'){drawLocal(car,-.23,.84,.30,.13,.028,2.05,'#f5f6fb',.2,view,proj,eye);drawLocal(car,.23,.84,.30,.13,.028,2.05,'#202b39',.15,view,proj,eye)}}}
- // Health bar floats just above every active car.
- if(!car.respawnTimer){const ratio=clamp((car.hp||1)/(car.maxHp||1),0,1),barColor=ratio>.55?'#54ed8a':ratio>.25?'#ffd65c':'#ff5a59';drawLocal(car,0,2.0,0,2.25,.11,.16,'#101b25',0,view,proj,eye);if(ratio>0)drawLocal(car,(ratio-1)*1.03,2.01,0,2.05*ratio,.12,.18,barColor,.15,view,proj,eye)}
+ // Glowing accent rails, headlamps and brake lights.
+ for(const side of [-1,1]){
+  drawLocal(car,side*(w*.47),.53,0,.055,.08,l*.60,c,.7,view,proj,eye);
+  const q=localPosition(car,side*w*.30,.68,l*.43);
+  drawMesh(meshes.sphere,model(q.x,q.y,q.z,car.yaw,.18,.10,.08),'#f4ffff',2.0,view,proj,eye,4);
+ }
+ if(car===player&&equippedCosmetic==='goldspoiler'){
+  drawLocal(car,-.72,1.03,-l*.43,.10,.30,.10,'#ffd85a',.2,view,proj,eye);
+  drawLocal(car,.72,1.03,-l*.43,.10,.30,.10,'#ffd85a',.2,view,proj,eye);
+  drawLocal(car,0,1.18,-l*.45,1.65,.15,.36,'#ffd85a',.4,view,proj,eye);
+ }
+ if(car===player&&equippedCosmetic==='racingstripes'){
+  drawLocal(car,-.23,.82,.35,.13,.03,l*.48,'#f5f6fb',.2,view,proj,eye);
+  drawLocal(car,.23,.82,.35,.13,.03,l*.48,'#202b39',.15,view,proj,eye);
+ }
+ // Health bar floats above active cars.
+ if(!car.respawnTimer){const ratio=clamp((car.hp||1)/(car.maxHp||1),0,1),barColor=ratio>.55?'#54ed8a':ratio>.25?'#ffd65c':'#ff5a59';drawLocal(car,0,2.0+h*.25,0,w*.90,.11,.16,'#101b25',0,view,proj,eye);if(ratio>0)drawLocal(car,(ratio-1)*w*.41,2.01+h*.25,0,w*.82*ratio,.12,.18,barColor,.15,view,proj,eye)}
 }
 function forward(yaw){return {x:Math.sin(yaw),z:Math.cos(yaw)}}
 function drawBall(view,proj,eye){drawMesh(meshes.sphere,model(ball.x,ball.y,ball.z,ball.spin,1.24,1.24,1.24),'#e6f2fa',.045,view,proj,eye,6);const dirs=[];for(let i=0;i<12;i++){let y=1-2*(i+.5)/12,r=Math.sqrt(1-y*y),a=i*2.399963;dirs.push([Math.cos(a)*r,y,Math.sin(a)*r])}for(const d of dirs){let xx=ball.x+d[0]*1.16,yy=ball.y+d[1]*1.16,zz=ball.z+d[2]*1.16;drawMesh(meshes.sphere,model(xx,yy,zz,ball.spin,.115,.115,.115),'#243a49',0,view,proj,eye)}}
