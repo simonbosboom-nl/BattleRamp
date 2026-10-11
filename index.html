@@ -542,7 +542,7 @@ try{
  last=performance.now();
  requestAnimationFrame(loop);
 }catch(e){
- console.error('3D-arena kon niet starten:',e);
+ console.error('3D-arena kon niet starten:',e);canvas.dataset.initError=e.message||String(e);
  const m=$('topmsg');
  if(m){m.textContent='3D starten mislukt: '+(e.message||e)+' · Probeer Chrome of Safari met WebGL-ondersteuning.';m.style.whiteSpace='normal';m.style.maxWidth='85vw';m.style.background='#541d27';m.style.color='#fff';}
  $('fallback').style.display='block';
