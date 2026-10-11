@@ -99,6 +99,7 @@ const { chromium } = require('playwright');
         menuHidden: !!menu && getComputedStyle(menu).display === 'none',
         message,
         rendererError: canvas?.dataset.rendererError || '',
+        initError: canvas?.dataset.initError || '',
         pixelDiversity,
         nonBackgroundPixels
       };
