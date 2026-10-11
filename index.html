@@ -409,7 +409,7 @@ function drawRamp(r,view,proj,eye){
 
 function drawEffects(view,proj,eye){for(const s of shots){const yaw=Math.atan2(s.dx,s.dz);drawMesh(meshes.cube,model(s.x,s.y,s.z,yaw,.18,.18,.98),s.color||'#48e9ff',1.7,view,proj,eye);drawMesh(meshes.sphere,model(s.x-s.dx*.62,s.y,s.z-s.dz*.62,0,.16,.16,.2),s.color||'#48e9ff',1.8,view,proj,eye)}for(const p of particles){drawMesh(meshes.sphere,model(p.x,p.y,p.z,0,p.size,p.size,p.size),p.color,.65,view,proj,eye)}}
 function cameraMatrices(){const f=forward(player.yaw);let eye,target;if(followCam){const bounce=Math.min(Math.abs(player.speed)*.012,.32);eye={x:player.x-f.x*9.3,y:player.y+3.75+bounce,z:player.z-f.z*9.3};target={x:player.x+f.x*15,y:player.y+1.35,z:player.z+f.z*15}}else{eye={x:player.x-f.x*.55,y:player.y+1.30,z:player.z-f.z*.55};target={x:eye.x+f.x*42,y:eye.y-4.0,z:eye.z+f.z*42}}const view=lookAt(eye,target,{x:0,y:1,z:0}),projection=perspective(74*Math.PI/180,canvas.width/canvas.height,.1,320);return {eye,view,projection}}
-function render(){if(!gl)throw new Error('WebGL is niet geïnitialiseerd');const dpr=Math.min(window.devicePixelRatio||1,1.5),w=Math.max(1,Math.floor((canvas.clientWidth||window.innerWidth)*dpr)),h=Math.max(1,Math.floor((canvas.clientHeight||window.innerHeight)*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h)}gl.clearColor(.035,.09,.14,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(prog);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.SCISSOR_TEST);gl.colorMask(true,true,true,true);const cm=cameraMatrices(),view=cm.view,proj=cm.projection,eye=cm.eye;
+function render(){if(!gl)throw new Error('WebGL is niet geïnitialiseerd');const dpr=Math.min(window.devicePixelRatio||1,1.5),w=Math.max(1,Math.floor(window.innerWidth*dpr)),h=Math.max(1,Math.floor(window.innerHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h)}gl.clearColor(.035,.09,.14,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(prog);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.SCISSOR_TEST);gl.colorMask(true,true,true,true);const cm=cameraMatrices(),view=cm.view,proj=cm.projection,eye=cm.eye;
 // Always draw a simple 3D pitch first; decorative stadium geometry follows.
 drawMesh(meshes.cube,model(0,-.22,0,0,136,.18,84),'#267e38',.03,view,proj,eye,1);
 drawStatic(view,proj,eye); // keep the field and stadium visible in both views
@@ -544,7 +544,7 @@ function loop(now){
  }
  requestAnimationFrame(loop)
 }
-function resize(){const dpr=Math.min(window.devicePixelRatio||1,1.5);const w=Math.max(1,Math.floor((canvas.clientWidth||window.innerWidth)*dpr)),h=Math.max(1,Math.floor((canvas.clientHeight||window.innerHeight)*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;if(gl)gl.viewport(0,0,w,h)}}
+function resize(){const dpr=Math.min(window.devicePixelRatio||1,1.5);const w=Math.max(1,Math.floor(window.innerWidth*dpr)),h=Math.max(1,Math.floor(window.innerHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;if(gl)gl.viewport(0,0,w,h)}}
 window.addEventListener('resize',resize,{passive:true});
 // Start uitsluitend de echte 3D-WebGL-renderer. Geen 2D-terugvalweergave.
 try{
