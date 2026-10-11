@@ -544,7 +544,8 @@ function loop(now){
  }
  requestAnimationFrame(loop)
 }
-function resize(){const dpr=Math.min(window.devicePixelRatio||1,1.5);const w=Math.max(1,Math.floor(canvas.clientWidth*dpr)),h=Math.max(1,Math.floor(canvas.clientHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;if(gl)gl.viewport(0,0,w,h)}}
+function resize(){const dpr=Math.min(window.devicePixelRatio||1,1.5);const w=Math.max(1,Math.floor((canvas.clientWidth||window.innerWidth)*dpr)),h=Math.max(1,Math.floor((canvas.clientHeight||window.innerHeight)*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;if(gl)gl.viewport(0,0,w,h)}}
+window.addEventListener('resize',resize,{passive:true});
 // Start uitsluitend de echte 3D-WebGL-renderer. Geen 2D-terugvalweergave.
 try{
  canvas.style.display='block';
