@@ -98,6 +98,7 @@ const { chromium } = require('playwright');
         height: canvas?.height || 0,
         menuHidden: !!menu && getComputedStyle(menu).display === 'none',
         message,
+        rendererError: canvas?.dataset.rendererError || '',
         pixelDiversity,
         nonBackgroundPixels
       };
