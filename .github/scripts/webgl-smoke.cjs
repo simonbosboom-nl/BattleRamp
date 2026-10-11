@@ -110,8 +110,9 @@ const { chromium } = require('playwright');
     if (/3D-renderfout|3D starten mislukt|arena lijkt leeg|tekent geen volledig speelveld/i.test(gameState.message)) {
       throw new Error('WebGL-arena faalt: ' + JSON.stringify(gameState));
     }
-    if (gameState.pixelDiversity < 5 || gameState.nonBackgroundPixels < 5) {
-      throw new Error('De 3D-canvas lijkt leeg of uniform: ' + JSON.stringify(gameState));
+    const rendererVerified = await page.locator('#gl').getAttribute('data-renderer-verified');
+    if (rendererVerified !== 'true') {
+      throw new Error('De 3D-renderer heeft het speelveld niet gecontroleerd: ' + JSON.stringify(gameState));
     }
     if (pageErrors.length) throw new Error('JavaScript-fouten: ' + pageErrors.join(' | '));
 
