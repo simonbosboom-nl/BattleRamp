@@ -441,7 +441,7 @@ function verifyWebGLFrame(){
  // Colour diversity alone can be fooled by a few stray pixels. Require scene coverage
  // through the lower viewport before we trust WebGL instead of switching to 2D.
  if(colors.size<5||spread<28||fieldPixels<5)throw new Error('WebGL tekent geen volledig speelveld; de 3D-arena lijkt leeg.');
- rendererVerified=true;
+ rendererVerified=true;canvas.dataset.rendererVerified='true';
 }
 function buildRamp(){
  if(!playing||paused)return say('Start eerst een wedstrijd.');
