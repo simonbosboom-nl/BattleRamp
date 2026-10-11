@@ -607,20 +607,25 @@ try{
   if(menu){menu.style.display='none';menu.classList.remove('cinematic-setup')}
   if(splash){splash.style.display='block';splash.style.visibility='visible';splash.style.opacity='1';splash.style.setProperty('pointer-events','auto','important');splash.removeAttribute('aria-hidden');splash.classList.remove('hidden')}
  },true);
- // Recreate the car choices if the main script stopped before it populated the grid.
+ // Keep car selection working even if the main script's per-card listeners were not attached.
  const grid=el('carGrid');
- if(grid&&!grid.querySelector('.carPick')){
-  const cars=[
-   ['Rally GT','Gebalanceerd · 110 HP'],
-   ['Neon Speedster','Supersnel · 78 HP'],
-   ['Battle Tank','Zwaar · 220 HP'],
-   ['Dune Buggy','Wendbaar · 88 HP'],
-   ['Hyper X','Snelle acceleratie · 96 HP']
-  ];
-  grid.innerHTML=cars.map((car,i)=>'<button type="button" class="carPick'+(i===0?' selected':'')+'" data-car="'+i+'"><b>'+car[0]+'</b><small>'+car[1]+'</small></button>').join('');
+ if(grid){
+  if(!grid.querySelector('.carPick')){
+   const cars=[
+    ['Rally GT','Gebalanceerd · 110 HP'],
+    ['Neon Speedster','Supersnel · 78 HP'],
+    ['Battle Tank','Zwaar · 220 HP'],
+    ['Dune Buggy','Wendbaar · 88 HP'],
+    ['Hyper X','Snelle acceleratie · 96 HP']
+   ];
+   grid.innerHTML=cars.map((car,i)=>'<button type="button" class="carPick'+(i===0?' selected':'')+'" data-car="'+i+'"><b>'+car[0]+'</b><small>'+car[1]+'</small></button>').join('');
+  }
+  // Delegation is resilient to cards being rebuilt after startup.
   grid.addEventListener('click',event=>{
-   const card=event.target instanceof Element?event.target.closest('[data-car]'):null;
-   if(card&&typeof window.__BRChooseCar==='function')window.__BRChooseCar(Number(card.dataset.car));
+   const card=event.target instanceof Element?event.target.closest('.carPick[data-car]'):null;
+   if(!card||!grid.contains(card))return;
+   event.preventDefault();
+   if(typeof window.__BRChooseCar==='function')window.__BRChooseCar(Number(card.dataset.car));
   });
  }
 })();
