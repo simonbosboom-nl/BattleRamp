@@ -57,9 +57,9 @@ const { chromium } = require('playwright');
         startDisabled: document.querySelector('#startBtn')?.disabled,
         selectedCar: document.querySelector('.carPick.selected')?.dataset.car || null,
         startLabel: document.querySelector('#startBtn')?.textContent || '',
-        message: document.querySelector('#topmsg')?.textContent || '',
-        pageErrors: pageErrors.slice()
+        message: document.querySelector('#topmsg')?.textContent || ''
       }));
+      diagnostic.pageErrors = pageErrors.slice();
       throw new Error('Startknop test mislukt; status=' + JSON.stringify(diagnostic) + '; ' + error.message);
     }
 
