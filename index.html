@@ -529,7 +529,7 @@ for(let i=shots.length-1;i>=0;i--)if(shots[i].life<=0)shots.splice(i,1);
 ball.x+=ball.vx*dt;ball.z+=ball.vz*dt;ball.y+=ball.vy*dt;ball.vy-=12*dt;if(ball.y<1.15){ball.y=1.15;ball.vy=Math.abs(ball.vy)*.68;if(Math.abs(ball.vy)<.35)ball.vy=0}ball.vx*=Math.pow(.991,dt*60);ball.vz*=Math.pow(.991,dt*60);ball.spin+=Math.hypot(ball.vx,ball.vz)*dt*.35;
 if(Math.abs(ball.z)>41.1){ball.z=clamp(ball.z,-41.1,41.1);ball.vz*=-.75}
 if(goalCooldown<=0&&Math.abs(ball.z)<8.25&&ball.x>69){resetAfterGoal('blue');return}if(goalCooldown<=0&&Math.abs(ball.z)<8.25&&ball.x< -69){resetAfterGoal('orange');return}if(Math.abs(ball.x)>67.1){ball.x=clamp(ball.x,-67.1,67.1);ball.vx*=-.72}
-for(const a of particles){a.x+=a.vx*dt;a.y+=a.vy*dt;a.z+=a.vz*dt;a.vy-=7*dt;a.life-=dt}for(let i=particles.length-1;i>=0;i--)if(particles[i].life<=0)particles.splice(i,1);if(msgHold>0)msgHold-=dt;else if(!paused)$('topmsg').textContent=followCam?'CHASE CAMERA · V = COCKPIT VIEW':'COCKPIT VIEW · V = CHASE CAMERA';updateHUD()}
+for(const a of particles){a.x+=a.vx*dt;a.y+=a.vy*dt;a.z+=a.vz*dt;a.vy-=7*dt;a.life-=dt}for(let i=particles.length-1;i>=0;i--)if(particles[i].life<=0)particles.splice(i,1);if(msgHold>0)msgHold-=dt;else if(!paused&&!canvas.dataset.rendererError)$('topmsg').textContent=followCam?'CHASE CAMERA · V = COCKPIT VIEW':'COCKPIT VIEW · V = CHASE CAMERA';updateHUD()}
 function loop(now){
  const dt=Math.min(.033,Math.max(.001,(now-last)/1000||.016));last=now;
  try{
@@ -538,7 +538,7 @@ function loop(now){
   render();
   if(gl){const err=gl.getError();if(err!==gl.NO_ERROR)throw new Error('WebGL-tekenfout '+err)}
  }catch(e){
-  console.error('3D-arena-renderer:',e);
+  console.error('3D-arena-renderer:',e);canvas.dataset.rendererError=e.message||String(e);
   const m=$('topmsg');
   if(m){m.textContent='3D-renderfout: '+(e.message||e)+' · Herlaad de game of controleer WebGL.';m.style.whiteSpace='normal';m.style.maxWidth='85vw';m.style.background='#541d27';m.style.color='#fff';}
  }
